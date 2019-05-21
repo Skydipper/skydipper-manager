@@ -1,0 +1,86 @@
+// Reset
+// Project settings (it doesn't include Grid system)
+@import 'settings';
+
+@import '../node_modules/normalize.css/normalize';
+
+// Libraries
+@import '../node_modules/vizzuality-components/dist/bundle';
+
+// Common files
+@import 'base';
+@import 'helpers';
+@import 'mixins';
+@import 'layouts/container', 'layouts/page', 'layouts/error', 'layouts/section', 'layouts/content',
+  'layouts/postcontent', 'layouts/row', 'layouts/footer', 'layouts/sidebar', 'layouts/map',
+  'layouts/static', 'layouts/log-in';
+
+// Components
+@import '../node_modules/react-redux-toastr/src/styles/index';
+@import './components/ui/avatar';
+@import './components/ui/aside';
+@import './components/ui/breadcrumbs';
+@import './components/ui/button';
+@import './components/ui/button-container';
+@import './components/ui/compound_menu';
+@import './components/ui/header-dropdown';
+@import './components/ui/icon';
+@import './components/ui/legend';
+@import './components/ui/modal';
+@import './components/ui/modal2';
+@import './components/ui/paginator';
+@import './components/ui/related-content';
+@import './components/ui/search-input';
+@import './components/ui/sortable-row';
+@import './components/ui/spinner';
+@import './components/ui/table';
+@import './components/ui/table_header_actions';
+@import './components/ui/table_tooltip';
+@import './components/ui/tabs';
+@import './components/ui/title';
+@import './components/ui/tooltip';
+
+// Form
+@import './components/form/form';
+@import './components/form/field';
+@import './components/form/field-container';
+@import './components/form/field-buttons';
+@import './components/form/file';
+@import './components/form/file-image';
+@import './components/form/checkbox';
+@import './components/form/radio';
+@import './components/form/select';
+@import './components/form/token';
+@import './components/form/toggle-search';
+@import './components/form/wysiwyg';
+
+// Map
+@import './components/map/map';
+@import './components/map/map-controls';
+@import './components/map/map-popup';
+@import './components/map/map-search-control';
+@import './components/map/map-side-by-side-layout';
+@import './components/map/map-side-by-side-range';
+
+// App
+@import './components/app/pages/profile/profile_edit_profile';
+
+// Manager - Dataset
+@import './components/manager/dataset/form';
+@import './components/manager/dataset/metadata-source-list';
+@import './components/manager/dataset/source-item';
+
+// Manager - Layer
+@import './components/manager/layer/form';
+@import './components/manager/layer/interactions';
+@import './components/manager/layer/layers_new';
+
+// Manager - Tags
+@import './components/manager/tags/tags_form';
+
+// Foundation:
+// We are using this library only for grid system
+@import '../node_modules/foundation-sites/scss/foundation';
+@include foundation-flex-classes;
+@include foundation-flex-grid;
+@include foundation-responsive-embed;

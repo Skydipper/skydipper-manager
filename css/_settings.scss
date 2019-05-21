@@ -1,0 +1,121 @@
+/*
+* Project settings
+* ================
+*
+* This file doesn't include grid system configuration,
+* in this case you should take a look '_foundation_settings' file.
+*/
+
+// Bourbon settings
+@import 'foundation_settings';
+$output-bourbon-deprecation-warnings: false;
+@import '../node_modules/bourbon/app/assets/stylesheets/settings/px-to-em';
+@import '../node_modules/bourbon/app/assets/stylesheets/functions/strip-units';
+@import '../node_modules/bourbon/app/assets/stylesheets/functions/px-to-rem';
+
+// grid
+@import 'foundation_settings';
+
+// Colors
+$catalina-blue: #0c377f;
+$matisse: #1c69a8;
+$yellow: #ffc71b;
+$red: #fd1b21;
+$green: #65b60d;
+$blue-turquoise: #3bb2d0;
+$charcoal-grey: #393f44;
+$dove-grey: #717171;
+$light-grey: #caccd0;
+$porcelain: #f4f6f7;
+$white: #ffffff;
+$black: #000;
+$sea-blue: #2c75b0;
+$blue-grey: #9aa2a9;
+$pale-grey: #f4f5f6;
+
+$color-primary: $catalina-blue;
+$color-secondary: $sea-blue;
+$color-tertiary: #f4f5f6;
+$primary-color: $color-primary;
+$secondary-color: $sea-blue;
+
+// Theme
+$body-font-color: $charcoal-grey;
+$header-font-color: $color-primary;
+$link-font-color: $sea-blue;
+$active-font-color: $yellow;
+$ui-font-color: $dove-grey;
+$alt-font-color: $white;
+$ui-bg-color: $porcelain;
+$body-bg-color: $white;
+
+$border-color-1: rgba(26, 28, 34, 0.1);
+$border-color-2: rgba(202, 204, 208, 0.85); // For inputs
+$alt-border-color: $white;
+
+// Typography
+$font-size-extra-small: 12px;
+$font-size-small: 13px;
+$font-size-normal: 14px;
+$font-size-medium: 16px;
+$font-size-big: 21px;
+$body-font-size: 14px;
+
+$font-size-h1: 64px;
+$font-size-h2: 42px;
+$font-size-h3: 26px;
+$font-size-h4: 16px;
+
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-bold: 700;
+
+$body-background: $body-bg-color;
+$body-font-size: $body-font-color;
+$body-font-color: $body-font-color;
+$body-font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans;
+$global-weight-normal: normal;
+$global-lineheight: 1.625;
+$global-font-size: $font-size-medium;
+
+$color-text-1: #393f44;
+$color-text-2: #999ba1;
+$color-text-3: #717171;
+
+// Layout
+$margin-size-extra-small: 15px;
+$margin-size-small: 30px;
+$margin-size: 50px;
+$margin-size-big: 100px;
+
+$space-1: 8px;
+
+// Header
+$header-main-height: 75px;
+$header-main-height-mobile: 50px;
+$header-secondary-height: 0;
+$header-bg-color: $color-primary;
+$header-gradient-color-1: rgba($catalina-blue, 0.8);
+$header-gradient-color-2: rgba($matisse, 0.7);
+
+// Shadows
+$thick-shadow: 0 20px 30px 0 rgba(0, 0, 0, 0.1);
+
+// Animations
+$animation-time: 0.16s;
+$animation-time-2: 0.24s;
+$animation-time-3: 0.5s;
+$animation-time-4: 0.75s;
+
+$ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+$ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+$ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+
+$ease-in-sine: cubic-bezier(0.47, 0, 0.745, 0.715);
+$ease-out-sine: cubic-bezier(0.39, 0.575, 0.565, 1);
+$ease-in-out-sine: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+
+// Map specific settings
+$map-controls-index: 10;
+$map-labels-index: 11;
+$map-box-shadow: 0 0 0 1px rgba($black, 0.1), 0 1px 2px rgba($black, 0.1);
