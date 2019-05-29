@@ -2,17 +2,17 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    name: { name }
-  name: { name }
+    name: {name}
+  name: {name}
 spec:
   revisionHistoryLimit: 2
   template:
     metadata:
       labels:
-        name: { name }
+        name: {name}
     spec:
       containers:
-        - name: { name }
+        - name: {name}
           image: vizzuality/{name}
           imagePullPolicy: Always
           resources:
