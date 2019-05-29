@@ -8,36 +8,9 @@ spec:
   revisionHistoryLimit: 2
   template:
     metadata:
-      annotations:
-        chaos.alpha.kubernetes.io/enabled: 'true'
       labels:
         name: { name }
     spec:
-      tolerations:
-        - key: 'type'
-          operator: 'Equal'
-          value: 'webapps'
-          effect: 'NoSchedule'
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: type
-                    operator: In
-                    values:
-                      - webapps
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: name
-                      operator: In
-                      values:
-                        - { name }
-                topologyKey: kubernetes.io/hostname
       containers:
         - name: { name }
           image: vizzuality/{name}
@@ -49,6 +22,14 @@ spec:
             limits:
               memory: '1Gi'
           env:
+            - name: CALLBACK_URL
+              value: http://skydipper.com/auth
+            - name: WRI_API_URL
+              value: https://api.skydipper.com/v1
+            - name: APPLICATIONS
+              value: skydipper
+            - name: API_ENV
+              value: production
             - name: SECRET
               valueFrom:
                 secretKeyRef:
@@ -59,7 +40,16 @@ spec:
                 secretKeyRef:
                   name: dbsecrets
                   key: REDIS_URI
-
+            - name: CONTROL_TOWER_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: mssecrets
+                    key: CT_URL
+            - name: BASEMAP_TILE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: mssecrets
+                    key: BASEMAP_TILE_URL
           ports:
             - containerPort: 3000
       restartPolicy: Always
