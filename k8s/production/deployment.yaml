@@ -41,15 +41,15 @@ spec:
                   name: dbsecrets
                   key: REDIS_URI
             - name: CONTROL_TOWER_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: mssecrets
-                    key: CT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mssecrets
+                  key: CT_URL
             - name: BASEMAP_TILE_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: mssecrets
-                    key: BASEMAP_TILE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mssecrets
+                  key: BASEMAP_TILE_URL
           ports:
             - containerPort: 3000
       restartPolicy: Always
