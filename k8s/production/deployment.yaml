@@ -29,10 +29,8 @@ spec:
               value: http://skydipper.com/auth
             - name: WRI_API_URL
               value: https://api.resourcewatch.org/v1
-              # value: https://api.skydipper.com/v1
             - name: APPLICATIONS
               value: rw
-              # value: skydipper
             - name: API_ENV
               value: production
             - name: SECRET
