@@ -1,4 +1,3 @@
-import 'isomorphic-fetch';
 import WRISerializer from 'wri-json-api-serializer';
 
 /**

@@ -38,7 +38,8 @@
         },
         "cwd": "babelrc"
       }
-    ]
+    ],
+    "@babel/plugin-proposal-optional-chaining"
   ],
   "presets": ["next/babel"]
 }

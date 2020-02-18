@@ -1,4 +1,3 @@
-import 'isomorphic-fetch';
 import { get, post } from 'utils/request';
 import WRISerializer from 'wri-json-api-serializer';
 

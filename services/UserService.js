@@ -1,5 +1,3 @@
-import 'isomorphic-fetch';
-
 export default class UserService {
   constructor(options) {
     if (!options) {

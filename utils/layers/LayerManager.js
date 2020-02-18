@@ -1,7 +1,6 @@
 /* eslint import/no-unresolved: 0 */
 /* eslint import/extensions: 0 */
 /* eslint global-require: 0 */
-import 'isomorphic-fetch';
 import isEmpty from 'lodash/isEmpty';
 
 if (typeof window !== 'undefined') {

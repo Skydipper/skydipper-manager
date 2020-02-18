@@ -4,7 +4,7 @@
     "es6": true,
     "node": true
   },
-  "extends": ["airbnb", "plugin:prettier/recommended"],
+  "extends": ["vizzuality", "plugin:jest/recommended", "plugin:prettier/recommended"],
   "parser": "babel-eslint",
   "settings": {
     "import/resolver": {
@@ -13,6 +13,10 @@
   },
   "rules": {
     "react/jsx-filename-extension": 0,
-    "jsx-a11y/anchor-is-valid": 0
-  }
+    "jsx-a11y/anchor-is-valid": 0,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "prettier/prettier": "error"
+  },
+  "plugins": ["babel", "jest", "react-hooks"]
 }

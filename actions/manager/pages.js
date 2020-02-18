@@ -1,4 +1,3 @@
-import 'isomorphic-fetch';
 import PagesService from 'services/PagesService';
 
 /**

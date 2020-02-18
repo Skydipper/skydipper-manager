@@ -1,5 +1,3 @@
-import 'isomorphic-fetch';
-
 export default class GraphService {
   constructor(options) {
     this.opts = options;

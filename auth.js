@@ -1,4 +1,4 @@
-require('isomorphic-fetch');
+require('isomorphic-unfetch');
 
 const passport = require('passport');
 const Strategy = require('passport-control-tower');

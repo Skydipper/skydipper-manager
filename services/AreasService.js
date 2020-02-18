@@ -1,5 +1,3 @@
-import 'isomorphic-fetch';
-
 export default class AreasService {
   constructor(options) {
     if (!options) throw new Error('options params is required.');
