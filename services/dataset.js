@@ -5,12 +5,12 @@ import { logger } from 'utils/logs';
 // API docs: https://resource-watch.github.io/doc-api/index-rw.html#dataset
 
 /**
- * Fetchs datasets according to params.
- *
- * @param {Object[]} params - params sent to the API.
- * @returns {Object[]} array of serialized datasets.
+ * Fetch datasets
+ * @param {any} params Query params to send to the API
+ * @param {boolean} includeMeta Whether to return the meta information
+ * @param {string} token The user's token
  */
-export const fetchDatasets = (params = {}, _meta = false, token) => {
+export const fetchDatasets = (params = {}, includeMeta, token) => {
   logger.info('fetches datasets');
 
   return WRIAPI.get('/dataset', {
@@ -38,7 +38,7 @@ export const fetchDatasets = (params = {}, _meta = false, token) => {
         throw new Error(statusText);
       }
 
-      if (_meta) {
+      if (includeMeta) {
         return {
           datasets: WRISerializer({ data: datasets }),
           meta

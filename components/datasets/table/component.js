@@ -1,288 +1,121 @@
-import React, { PureComponent } from 'react';
-
-// utils
+import React, { useEffect, useCallback, useReducer } from 'react';
+import PropTypes from 'prop-types';
 import debounce from 'lodash/debounce';
 
-// services
 import { fetchDatasets } from 'services/dataset';
-
-// components
 import Spinner from 'components/ui/Spinner';
 import CustomTable from 'components/ui/customtable/CustomTable';
 import SearchInput from 'components/ui/SearchInput';
-import NameTD from './td/name';
-// import CodeTD from './td/code';
-import StatusTD from './td/status';
-import PublishedTD from './td/published';
-import OwnerTD from './td/owner';
-// import ApplicationsTD from './td/applications';
-import UpdatedAtTD from './td/updated-at';
-import RelatedContentTD from './td/related-content';
-import EditAction from './actions/edit';
-import DeleteAction from './actions/delete';
 
-// constants
-import { INITIAL_PAGINATION } from './constants';
+import { INITIAL_PAGINATION, TABLE_COLUMNS, TABLE_ACTIONS, TABLE_SORT } from './constants';
+import { parseDatasets } from './helpers';
 
-class DatasetsTable extends PureComponent {
-  state = {
-    pagination: INITIAL_PAGINATION,
-    loading: true,
+const fetchReducer = (state, action) => {
+  switch (action.type) {
+    case 'FETCH_INIT':
+      return { ...state, loading: true, error: false, refetch: false };
+    case 'FETCH_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        error: false,
+        datasets: parseDatasets(action.payload.datasets),
+        meta: {
+          pages: action.payload.meta['total-pages'],
+          size: action.payload.meta['total-items'],
+        },
+      };
+    case 'FETCH_FAILURE':
+      return { ...state, loading: false, error: true };
+    case 'REFETCH':
+      return { ...state, refetch: true };
+    case 'SEARCH':
+      return { ...state, page: 1, search: action.payload };
+    case 'PAGE_CHANGE':
+      return { ...state, page: action.payload };
+    default:
+      return state;
+  }
+};
+
+const DatasetsTable = ({ token }) => {
+  /**
+   * @type {[any, (action: any) => void]}
+   */
+  const [state, dispatch] = useReducer(fetchReducer, {
+    loading: false,
+    error: false,
     datasets: [],
-    filters: { name: null }
-  };
+    meta: {},
+    search: '',
+    page: 1,
+    refetch: false, // Trigger manual refetch
+  });
 
-  componentDidMount() {
-    const { pagination } = this.state;
-    const { user: { token } } = this.props;
+  const onSearch = useCallback(
+    debounce(
+      /**
+       * @param {string} value Search value
+       */
+      value => dispatch({ type: 'SEARCH', payload: value }),
+      250
+    ),
+    []
+  );
 
-    fetchDatasets(
-      {
-        includes: 'layer,metadata,vocabulary,user',
-        'page[number]': pagination.page,
-        'page[size]': pagination.limit,
-        application: process.env.APPLICATIONS
-      },
-      true,
-      token
-    )
-      .then(({ datasets, meta }) => {
-        const { 'total-pages': pages, 'total-items': size } = meta;
-        const nextPagination = {
-          ...pagination,
-          size,
-          pages
-        };
+  const onRemoveDataset = () => dispatch({ type: 'REFETCH' });
 
-        this.setState({
-          loading: false,
-          pagination: nextPagination,
-          datasets: this.parseDatasets(datasets)
-        });
-      })
-      .catch(error => {
-        this.setState({ error });
-      });
-  }
+  const onChangePage = page => dispatch({ type: 'PAGE_CHANGE', payload: page });
 
-  /**
-   * Event handler executed when the user search for a dataset
-   * @param {string} { value } Search keywords
-   */
-  onSearch = debounce(value => {
-    const { user: { token } } = this.props;
-    const { pagination, filters } = this.state;
-
-    if (value.length > 0 && value.length < 3) return;
-
-    this.setState(
-      {
-        loading: true,
-        filters: {
-          ...filters,
-          name: value
-        }
-      },
-      () => {
-        const params = {
-          includes: 'layer,metadata,vocabulary,user',
-          ...(!value.length && {
-            'page[number]': INITIAL_PAGINATION.page,
-            'page[size]': INITIAL_PAGINATION.limit,
-            application: process.env.APPLICATIONS
-          }),
-          ...(value.length > 2 && {
-            'page[number]': INITIAL_PAGINATION.page,
-            'page[size]': INITIAL_PAGINATION.limit,
-            application: process.env.APPLICATIONS,
-            sort: 'name',
-            name: value
-          })
-        };
-
-        fetchDatasets(params, true, token)
-          .then(({ datasets, meta }) => {
-            const { 'total-pages': pages, 'total-items': size } = meta;
-            const nextPagination = {
-              ...pagination,
-              size,
-              pages,
-              page: INITIAL_PAGINATION.page
-            };
-
-            this.setState({
-              loading: false,
-              pagination: nextPagination,
-              datasets: this.parseDatasets(datasets)
-            });
-          })
-          .catch(error => {
-            this.setState({ error });
-          });
-      }
-    );
-  }, 250);
-
-  onChangePage = nextPage => {
-    const { user: { token } } = this.props;
-    const { pagination, filters } = this.state;
-
-    this.setState(
-      {
-        loading: true,
-        pagination: {
-          ...pagination,
-          page: nextPage
-        }
-      },
-      () => {
-        const {
-          pagination: { page }
-        } = this.state;
-
-        fetchDatasets({
-          includes: 'layer,metadata,vocabulary,user',
-          'page[number]': page,
-          'page[size]': pagination.limit,
-          application: process.env.APPLICATIONS,
-          ...filters
-        }, false, token)
-          .then(datasets => {
-            this.setState({
-              loading: false,
-              datasets: this.parseDatasets(datasets)
-            });
-          })
-          .catch(error => {
-            this.setState({ error });
-          });
-      }
-    );
-  };
-
-  onRemoveDataset = () => {
-    const { user: { token } } = this.props;
-    const { pagination, filters } = this.state;
-
-    this.setState({ loading: true });
+  useEffect(() => {
+    dispatch({ type: 'FETCH_INIT' });
 
     fetchDatasets(
       {
-        includes: 'layer,metadata,vocabulary,user',
-        'page[number]': pagination.page,
-        'page[size]': pagination.limit,
+        includes: 'layer,metadata',
+        'page[number]': state.page,
+        'page[size]': INITIAL_PAGINATION.limit,
         application: process.env.APPLICATIONS,
-        ...filters
+        ...(state.search?.length > 3 ? { name: state.search } : {}),
       },
       true,
       token
     )
-      .then(({ datasets, meta }) => {
-        const { 'total-pages': pages, 'total-items': size } = meta;
-        const nextPagination = {
-          ...pagination,
-          size,
-          pages
-        };
+      .then(data => dispatch({ type: 'FETCH_SUCCESS', payload: data }))
+      .catch(() => dispatch({ type: 'FETCH_FAILURE' }));
+  }, [state.page, state.search, state.refetch, token]);
 
-        this.setState({
-          loading: false,
-          pagination: nextPagination,
-          datasets: this.parseDatasets(datasets)
-        });
-      })
-      .catch(error => {
-        this.setState({ error });
-      });
-  };
-
-  /**
-   * Parse the datasets before passing them to the table
-   * @param {Array<Object>} datasets List of the datasets
-   */
-  // eslint-disable-next-line class-methods-use-this
-  parseDatasets(datasets) {
-    return datasets.map(d => ({
-      ...d,
-      owner: d.user && d.user.email ? d.user.email : '',
-    }));
-  }
-
-  render() {
-    const { loading, pagination, datasets, error } = this.state;
-
-    return (
-      <div className="c-dataset-table">
-        <Spinner className="-light" isLoading={loading} />
-
-        {error && <p>
-Error:{error}</p>}
-
-        <SearchInput
-          input={{ placeholder: 'Search dataset' }}
-          link={{
-            label: 'New dataset',
-            route: 'manager_data_detail',
-            params: { tab: 'datasets', id: 'new' }
-          }}
-          onSearch={this.onSearch}
+  return (
+    <div className="c-dataset-table">
+      <Spinner className="-light" isLoading={state.loading} />
+      <SearchInput
+        input={{ placeholder: 'Search dataset' }}
+        link={{
+          label: 'New dataset',
+          route: 'manager_data_detail',
+          params: { tab: 'datasets', id: 'new' },
+        }}
+        onSearch={onSearch}
+      />
+      {state.error && <p>Unable to load the data</p>}
+      {!state.error && (
+        <CustomTable
+          columns={TABLE_COLUMNS}
+          actions={TABLE_ACTIONS}
+          sort={TABLE_SORT}
+          filters={false}
+          data={state.datasets}
+          onRowDelete={onRemoveDataset}
+          onChangePage={onChangePage}
+          pagination={{ ...INITIAL_PAGINATION, page: state.page, ...state.meta }}
         />
-        {!error && (
-          <CustomTable
-            columns={[
-              {
-                label: 'Name',
-                value: 'name',
-                td: NameTD,
-                tdProps: { route: 'manager_data_detail' }
-              },
-              // { label: 'Code', value: 'code', td: CodeTD },
-              { label: 'Status', value: 'status', td: StatusTD },
-              { label: 'Published', value: 'published', td: PublishedTD },
-              { label: 'Provider', value: 'provider' },
-              { label: 'Owner', value: 'owner', td: OwnerTD },
-              { label: 'Updated at', value: 'updatedAt', td: UpdatedAtTD },
-              // { label: 'Applications', value: 'application', td: ApplicationsTD },
-              {
-                label: 'Related content',
-                value: 'status',
-                td: RelatedContentTD,
-                tdProps: { route: 'manager_data_detail' }
-              }
-            ]}
-            actions={{
-              show: true,
-              list: [
-                {
-                  name: 'Edit',
-                  route: 'manager_data_detail',
-                  params: { tab: 'datasets', subtab: 'edit', id: '{{id}}' },
-                  show: true,
-                  component: EditAction,
-                  componentProps: { route: 'manager_data_detail' }
-                },
-                {
-                  name: 'Remove',
-                  route: 'manager_data_detail',
-                  params: { tab: 'datasets', subtab: 'remove', id: '{{id}}' },
-                  component: DeleteAction
-                }
-              ]
-            }}
-            sort={{
-              field: 'updatedAt',
-              value: -1
-            }}
-            filters={false}
-            data={datasets}
-            onRowDelete={this.onRemoveDataset}
-            onChangePage={this.onChangePage}
-            pagination={pagination}
-          />
-        )}
-      </div>
-    );
-  }
-}
+      )}
+    </div>
+  );
+};
+
+DatasetsTable.propTypes = {
+  token: PropTypes.string.isRequired,
+};
 
 export default DatasetsTable;
