@@ -1,258 +1,123 @@
-import React, { PureComponent } from 'react';
+import React, { useReducer, useCallback, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import debounce from 'lodash/debounce';
 
-// services
 import { fetchLayers } from 'services/LayersService';
-
-// components
 import Spinner from 'components/ui/Spinner';
 import CustomTable from 'components/ui/customtable/CustomTable';
 import SearchInput from 'components/ui/SearchInput';
-import NameTD from './td/name';
-import OwnerTD from './td/owner';
-import UpdatedAtTD from './td/updated-at';
-import EditAction from './actions/edit';
-import DeleteAction from './actions/delete';
-import GoToDatasetAction from './actions/go-to-dataset';
 
-// constants
-import { INITIAL_PAGINATION } from './constants';
+import { INITIAL_PAGINATION, TABLE_COLUMNS, TABLE_ACTIONS, TABLE_SORT } from './constants';
 
-class LayersTable extends PureComponent {
-  state = {
-    pagination: INITIAL_PAGINATION,
-    loading: true,
-    layers: [],
-    filters: { name: null }
-  };
-
-  componentDidMount() {
-    const { pagination } = this.state;
-
-    fetchLayers(
-      {
-        includes: 'user',
-        'page[number]': pagination.page,
-        'page[size]': pagination.limit,
-        application: process.env.APPLICATIONS
-      },
-      true
-    )
-      .then(({ layers, meta }) => {
-        const { 'total-pages': pages, 'total-items': size } = meta;
-        const nextPagination = {
-          ...pagination,
-          size,
-          pages
-        };
-
-        this.setState({
-          loading: false,
-          pagination: nextPagination,
-          layers
-        });
-      })
-      .catch(error => {
-        this.setState({ error: error.message });
-      });
+const fetchReducer = (state, action) => {
+  switch (action.type) {
+    case 'FETCH_INIT':
+      return { ...state, loading: true, error: false, refetch: false };
+    case 'FETCH_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        error: false,
+        layers: action.payload.layers,
+        meta: {
+          pages: action.payload.meta['total-pages'],
+          size: action.payload.meta['total-items'],
+        },
+      };
+    case 'FETCH_FAILURE':
+      return { ...state, loading: false, error: true };
+    case 'REFETCH':
+      return { ...state, refetch: true };
+    case 'SEARCH':
+      return { ...state, page: 1, search: action.payload };
+    case 'PAGE_CHANGE':
+      return { ...state, page: action.payload };
+    default:
+      return state;
   }
+};
 
+const LayersTable = ({ token }) => {
   /**
-   * Event handler executed when the user search for a layer
-   * @param {string} { value } Search keywords
+   * @type {[any, (action: any) => void]}
    */
-  onSearch = debounce(value => {
-    const { pagination, filters } = this.state;
+  const [state, dispatch] = useReducer(fetchReducer, {
+    loading: false,
+    error: false,
+    layers: [],
+    meta: {},
+    search: '',
+    page: 1,
+    refetch: false, // Trigger manual refetch
+  });
 
-    if (value.length > 0 && value.length < 3) return;
+  const onSearch = useCallback(
+    debounce(
+      /**
+       * @param {string} value Search value
+       */
+      value => dispatch({ type: 'SEARCH', payload: value }),
+      250
+    ),
+    []
+  );
 
-    this.setState(
-      {
-        loading: true,
-        filters: {
-          ...filters,
-          name: value
-        }
-      },
-      () => {
-        const params = {
-          includes: 'user',
-          ...(!value.length && {
-            'page[number]': INITIAL_PAGINATION.page,
-            'page[size]': INITIAL_PAGINATION.limit,
-            application: process.env.APPLICATIONS
-          }),
-          ...(value.length > 2 && {
-            'page[number]': INITIAL_PAGINATION.page,
-            'page[size]': INITIAL_PAGINATION.limit,
-            application: process.env.APPLICATIONS,
-            sort: 'name',
-            name: value
-          })
-        };
+  const onRemoveLayer = () => dispatch({ type: 'REFETCH' });
 
-        fetchLayers(params, true)
-          .then(({ layers, meta }) => {
-            const { 'total-pages': pages, 'total-items': size } = meta;
-            const nextPagination = {
-              ...pagination,
-              size,
-              pages,
-              page: INITIAL_PAGINATION.page
-            };
+  const onChangePage = page => dispatch({ type: 'PAGE_CHANGE', payload: page });
 
-            this.setState({
-              loading: false,
-              pagination: nextPagination,
-              layers
-            });
-          })
-          .catch(error => {
-            this.setState({ error });
-          });
-      }
-    );
-  }, 250);
-
-  onChangePage = nextPage => {
-    const { pagination, filters } = this.state;
-
-    this.setState(
-      {
-        loading: true,
-        pagination: {
-          ...pagination,
-          page: nextPage
-        }
-      },
-      () => {
-        const {
-          pagination: { page }
-        } = this.state;
-
-        fetchLayers({
-          includes: 'user',
-          'page[number]': page,
-          'page[size]': pagination.limit,
-          application: process.env.APPLICATIONS,
-          ...filters
-        })
-          .then(layers => {
-            this.setState({
-              loading: false,
-              layers
-            });
-          })
-          .catch(error => {
-            this.setState({ error });
-          });
-      }
-    );
-  };
-
-  onRemoveLayer = () => {
-    const { pagination, filters } = this.state;
-
-    this.setState({ loading: true });
+  useEffect(() => {
+    dispatch({ type: 'FETCH_INIT' });
 
     fetchLayers(
       {
         includes: 'user',
-        'page[number]': pagination.page,
-        'page[size]': pagination.limit,
+        'page[number]': state.page,
+        'page[size]': INITIAL_PAGINATION.limit,
         application: process.env.APPLICATIONS,
-        ...filters
+        ...(state.search?.length > 3 ? { name: state.search } : {}),
       },
-      true
+      true,
+      token
     )
-      .then(({ layers, meta }) => {
-        const { 'total-pages': pages, 'total-items': size } = meta;
-        const nextPagination = {
-          ...pagination,
-          size,
-          pages
-        };
+      .then(data => dispatch({ type: 'FETCH_SUCCESS', payload: data }))
+      .catch(() => dispatch({ type: 'FETCH_FAILURE' }));
+  }, [state.page, state.search, state.refetch, token]);
 
-        this.setState({
-          loading: false,
-          pagination: nextPagination,
-          layers
-        });
-      })
-      .catch(error => {
-        this.setState({ error });
-      });
-  };
-
-  render() {
-    const { loading, pagination, layers, error } = this.state;
-
-    return (
-      <div className="c-layer-table">
-        <Spinner className="-light" isLoading={loading} />
-
-        {error && <p>
-Error:{error}</p>}
-
-        <SearchInput
-          input={{ placeholder: 'Search layer' }}
-          link={{
-            label: 'New layer',
-            route: 'manager_data_detail',
-            params: {
-              tab: 'layers',
-              id: 'new'
-            }
-          }}
-          onSearch={this.onSearch}
+  return (
+    <div className="c-layer-table">
+      <Spinner className="-light" isLoading={state.loading} />
+      <SearchInput
+        input={{ placeholder: 'Search layer' }}
+        link={{
+          label: 'New layer',
+          route: 'manager_data_detail',
+          params: {
+            tab: 'layers',
+            id: 'new',
+          },
+        }}
+        onSearch={onSearch}
+      />
+      {state.error && <p>Unable to load the data</p>}
+      {!state.error && (
+        <CustomTable
+          columns={TABLE_COLUMNS}
+          actions={TABLE_ACTIONS}
+          sort={TABLE_SORT}
+          filters={false}
+          data={state.layers}
+          onRowDelete={onRemoveLayer}
+          onChangePage={onChangePage}
+          pagination={{ ...INITIAL_PAGINATION, page: state.page, ...state.meta }}
         />
+      )}
+    </div>
+  );
+};
 
-        {!error && (
-          <CustomTable
-            columns={[
-              { label: 'Name', value: 'name', td: NameTD },
-              { label: 'Provider', value: 'provider' },
-              { label: 'Owner', value: 'owner', td: OwnerTD },
-              { label: 'Updated at', value: 'updatedAt', td: UpdatedAtTD }
-            ]}
-            actions={{
-              show: true,
-              list: [
-                {
-                  name: 'Edit',
-                  route: 'manager_data_detail',
-                  params: { tab: 'layers', subtab: 'edit', id: '{{id}}' },
-                  show: true,
-                  component: EditAction
-                },
-                {
-                  name: 'Remove',
-                  route: 'manager_data_detail',
-                  params: { tab: 'layers', subtab: 'remove', id: '{{id}}' },
-                  component: DeleteAction
-                },
-                {
-                  name: 'Go to dataset',
-                  route: 'manager_data_detail',
-                  params: { tab: 'datasets', subtab: 'edit', id: '{{id}}' },
-                  component: GoToDatasetAction
-                }
-              ]
-            }}
-            sort={{
-              field: 'updatedAt',
-              value: -1
-            }}
-            filters={false}
-            data={layers}
-            onRowDelete={this.onRemoveLayer}
-            onChangePage={this.onChangePage}
-            pagination={pagination}
-          />
-        )}
-      </div>
-    );
-  }
-}
+LayersTable.propTypes = {
+  token: PropTypes.string.isRequired,
+};
 
 export default LayersTable;

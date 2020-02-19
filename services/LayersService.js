@@ -74,19 +74,20 @@ export default class LayersService {
 }
 
 /**
- * Fetchs layers according to params.
- *
- * @param {Object[]} params - params sent to the API.
- * @returns {Object[]} array of serialized layers.
+ * Fetchs layers
+ * @param {any} params Query params to send to the API
+ * @param {boolean} includeMeta Whether to return the meta information
+ * @param {string} token The user's token
  */
-export const fetchLayers = (params = {}, _meta = false) => {
+export const fetchLayers = (params = {}, includeMeta, token) => {
   logger.info('fetches layers');
 
   return WRIAPI.get('/layer', {
     headers: {
       ...WRIAPI.defaults.headers,
       // TO-DO: forces the API to not cache, this should be removed at some point
-      'Upgrade-Insecure-Requests': 1
+      'Upgrade-Insecure-Requests': 1,
+      ...(token ? { Authorization: token } : {})
     },
     params: {
       env: process.env.API_ENV,
@@ -106,7 +107,7 @@ export const fetchLayers = (params = {}, _meta = false) => {
         throw new Error(statusText);
       }
 
-      if (_meta) {
+      if (includeMeta) {
         return {
           layers: WRISerializer({ data: layers }),
           meta
