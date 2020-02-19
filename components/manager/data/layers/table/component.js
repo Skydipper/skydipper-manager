@@ -99,7 +99,7 @@ const LayersTable = ({ token }) => {
         }}
         onSearch={onSearch}
       />
-      {state.error && <p>Unable to load the data</p>}
+      {state.error && <div className="callout alert small">Unable to load the data</div>}
       {!state.error && (
         <CustomTable
           columns={TABLE_COLUMNS}
