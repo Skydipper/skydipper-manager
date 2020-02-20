@@ -1,32 +1,11 @@
-import React, { PureComponent } from 'react';
-import { Router } from 'routes';
-import PropTypes from 'prop-types';
+import React from 'react';
 
-// Components
-import DatasetsForm from 'components/datasets/form/DatasetsForm';
+import DatasetsForm from 'components/datasets/form';
 
-class DatasetsNew extends PureComponent {
-  static propTypes = { user: PropTypes.object.isRequired };
-
-  handleSubmit = () => {
-    Router.pushRoute('manager_data', { tab: 'datasets' });
-  };
-
-  render() {
-    const {
-      user: { token }
-    } = this.props;
-
-    return (
-      <div className="c-datasets-new">
-        <DatasetsForm
-          application={[process.env.APPLICATIONS]}
-          authorization={token}
-          onSubmit={this.handleSubmit}
-        />
-      </div>
-    );
-  }
-}
+const DatasetsNew = () => (
+  <div className="c-datasets-new">
+    <DatasetsForm />
+  </div>
+);
 
 export default DatasetsNew;

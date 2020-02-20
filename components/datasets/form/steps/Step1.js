@@ -1,40 +1,43 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import compact from 'lodash/compact';
-
-// Redux
 import { connect } from 'react-redux';
 
-// Constants
 import {
   PROVIDER_TYPES_DICTIONARY,
   FORM_ELEMENTS,
-  DATASET_TYPES
+  DATASET_TYPES,
 } from 'components/datasets/form/constants';
-
-// Components
 import Field from 'components/form/Field';
 import Input from 'components/form/Input';
 import File from 'components/form/File';
 import Select from 'components/form/SelectInput';
 import Checkbox from 'components/form/Checkbox';
-import Title from 'components/ui/Title';
-import Spinner from 'components/ui/Spinner';
-
-// Modal
 import Modal from 'components/modal/modal-component';
 import TrySubscriptionModal from 'components/datasets/form/try-subscription-modal';
 
-class Step1 extends React.Component {
+const PROVIDER_OPTIONS = Object.keys(PROVIDER_TYPES_DICTIONARY).map(key => ({
+  label: PROVIDER_TYPES_DICTIONARY[key].label,
+  value: PROVIDER_TYPES_DICTIONARY[key].value,
+}));
+
+class Step1 extends PureComponent {
+  static propTypes = {
+    datasetId: PropTypes.string,
+    form: PropTypes.object.isRequired,
+    onChange: PropTypes.func.isRequired,
+    user: PropTypes.object.isRequired,
+  };
+
+  static defaultProps = {
+    datasetId: null,
+  };
+
   constructor(props) {
     super(props);
 
     this.state = {
-      dataset: props.dataset,
-      form: props.form,
-      carto: {},
       subscribableSelected: props.form.subscribable.length > 0,
-      activeSubscriptionModal: null
+      activeSubscriptionModal: null,
     };
 
     // BINDINGS
@@ -42,54 +45,50 @@ class Step1 extends React.Component {
     this.handleAddSubscription = this.handleAddSubscription.bind(this);
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({ form: nextProps.form });
-  }
+  onCartoFieldsChange(obj) {
+    const { form, onChange } = this.props;
+    const { cartoAccountUsername = '', tableName = '' } = { ...form, ...obj };
 
-  /**
-   * UI EVENTS
-   * - onCartoFieldsChange
-   * - onLegendChange
-   * - onSubscribableChange
-   * - onSubscribableCheckboxChange
-   * - handleRemoveSubscription
-   * - handleAddSubscription
-   */
-  onCartoFieldsChange() {
-    const { cartoAccountUsername, tableName } = this.state.carto;
     const connectorUrl = `https://${cartoAccountUsername}.carto.com/tables/${tableName}/public`;
 
-    this.props.onChange({
-      connectorUrl
+    onChange({
+      ...obj,
+      connectorUrl,
     });
   }
 
   onLegendChange(obj) {
-    const legend = Object.assign({}, this.props.form.legend, obj);
-    this.props.onChange({ legend });
+    const { form, onChange } = this.props;
+
+    const legend = Object.assign({}, form.legend, obj);
+    onChange({ legend });
   }
 
   onSubscribableChange(obj) {
-    let { subscribable } = this.props.form;
+    const {
+      form: { subscribable },
+      onChange,
+    } = this.props;
 
-    subscribable = subscribable.map(s => {
-      if (s.id === obj.id) {
-        return Object.assign({}, s, obj);
-      }
-      return s;
+    onChange({
+      subscribable: subscribable.map(s => {
+        if (s.id === obj.id) {
+          return Object.assign({}, s, obj);
+        }
+        return s;
+      }),
     });
-
-    this.props.onChange({ subscribable });
   }
 
   onSubscribableCheckboxChange(checked) {
-    this.setState({
-      subscribableSelected: checked
-    });
+    const { onChange } = this.props;
+
+    this.setState({ subscribableSelected: checked });
+
     if (checked) {
-      this.props.onChange({ subscribable: [{ type: '', value: '', id: 0 }] });
+      onChange({ subscribable: [{ type: '', value: '', id: 0 }] });
     } else {
-      this.props.onChange({ subscribable: [] });
+      onChange({ subscribable: [] });
     }
   }
 
@@ -97,62 +96,28 @@ class Step1 extends React.Component {
     this.setState({ activeSubscriptionModal: id });
   }
 
-  /**
-   * HELPERS
-   * - setProviderOptions
-   */
-  setProviderOptions() {
-    const { basic, dataset } = this.props;
-
-    const options = Object.keys(PROVIDER_TYPES_DICTIONARY).map(key => {
-      if (basic && !dataset) {
-        if (PROVIDER_TYPES_DICTIONARY[key].basic) {
-          return {
-            label: PROVIDER_TYPES_DICTIONARY[key].label,
-            value: PROVIDER_TYPES_DICTIONARY[key].value
-          };
-        }
-
-        return null;
-      }
-
-      return {
-        label: PROVIDER_TYPES_DICTIONARY[key].label,
-        value: PROVIDER_TYPES_DICTIONARY[key].value
-      };
-    });
-
-    return basic ? compact(options) : options;
-  }
-
   handleRemoveSubscription(id) {
-    let { subscribable } = this.state.form;
-    subscribable = subscribable.filter(s => s.id !== id);
+    const { onChange } = this.props;
+    const {
+      form: { subscribable },
+    } = this.state;
 
-    this.props.onChange({ subscribable });
+    onChange({ subscribable: subscribable.filter(s => s.id !== id) });
   }
 
   handleAddSubscription() {
-    const { subscribable } = this.state.form;
-    subscribable.push({ type: '', value: '', id: Date.now() });
-    this.props.onChange({ subscribable });
-  }
+    const { onChange } = this.props;
+    const {
+      form: { subscribable },
+    } = this.state;
 
-  renderMainDateOptions(option) {
-    return (
-      <div>
-        {option.value}{' '}
-        {option.type && typeof option.type === 'string' ? (
-          <small className="_right">{option.type}</small>
-        ) : null}
-      </div>
-    );
+    onChange({ subscribable: [...subscribable, { type: '', value: '', id: Date.now() }] });
   }
 
   render() {
-    const { user, columns, loadingColumns, basic } = this.props;
-    const { dataset, subscribableSelected } = this.state;
-    const { provider, columnFields } = this.state.form;
+    const { datasetId, form, onChange, user } = this.props;
+    const { subscribableSelected, activeSubscriptionModal } = this.state;
+    const { provider } = form;
 
     // Reset FORM_ELEMENTS
     FORM_ELEMENTS.elements = {};
@@ -168,13 +133,10 @@ class Step1 extends React.Component {
     const isWMS = provider === 'wms';
     const isDocument = isJson || isXml || isCsv || isTsv;
 
-    const dateColumns = columns.map(f => ({ label: f.name, value: f.name, type: f.type }));
-    const columnFieldsOptions = (columnFields || []).map(f => ({ label: f, value: f }));
-
     return (
       <div>
         <fieldset className="c-field-container">
-          {user.role === 'ADMIN' && !basic && (
+          {user.role === 'ADMIN' && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.env = c;
@@ -185,9 +147,9 @@ class Step1 extends React.Component {
               className="-fluid"
               options={[
                 { label: 'Pre-production', value: 'preproduction' },
-                { label: 'Production', value: 'production' }
+                { label: 'Production', value: 'production' },
               ]}
-              onChange={value => this.props.onChange({ env: value })}
+              onChange={value => onChange({ env: value })}
               properties={{
                 name: 'env',
                 label: 'Environment',
@@ -195,45 +157,43 @@ class Step1 extends React.Component {
                 noResultsText: 'Please, type the name of the columns and press enter',
                 promptTextCreator: label => `The name of the column is "${label}"`,
                 default: 'preproduction',
-                value: this.props.form.env
+                value: form.env,
               }}
             >
               {Select}
             </Field>
           )}
 
-          {user.role === 'ADMIN' && !basic && (
+          {user.role === 'ADMIN' && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.published = c;
               }}
-              onChange={value => this.props.onChange({ published: value.checked })}
+              onChange={value => onChange({ published: value.checked })}
               validations={['required']}
               properties={{
                 name: 'published',
                 label: 'Do you want to set this dataset as published?',
-                value: 'published',
                 title: 'Published',
-                defaultChecked: !dataset ? user.role === 'ADMIN' : this.props.form.published
+                default: !datasetId ? user.role === 'ADMIN' : form.published,
               }}
             >
               {Checkbox}
             </Field>
           )}
 
-          {user.role === 'ADMIN' && !basic && (
+          {user.role === 'ADMIN' && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.protected = c;
               }}
-              onChange={value => this.props.onChange({ protected: value.checked })}
+              onChange={value => onChange({ protected: value.checked })}
               validations={['required']}
               properties={{
                 name: 'protected',
                 label: 'Do you want to set this dataset as protected?',
-                value: 'protected',
                 title: 'Protected',
-                defaultChecked: this.props.form.protected
+                default: form.protected,
               }}
             >
               {Checkbox}
@@ -244,7 +204,7 @@ class Step1 extends React.Component {
             ref={c => {
               if (c) FORM_ELEMENTS.elements.name = c;
             }}
-            onChange={value => this.props.onChange({ name: value })}
+            onChange={value => onChange({ name: value })}
             validations={['required']}
             className="-fluid"
             properties={{
@@ -252,7 +212,7 @@ class Step1 extends React.Component {
               label: 'Title',
               type: 'text',
               required: true,
-              default: this.state.form.name
+              default: form.name,
             }}
           >
             {Input}
@@ -262,27 +222,27 @@ class Step1 extends React.Component {
             ref={c => {
               if (c) FORM_ELEMENTS.elements.subtitle = c;
             }}
-            onChange={value => this.props.onChange({ subtitle: value })}
+            onChange={value => onChange({ subtitle: value })}
             className="-fluid"
             properties={{
               name: 'subtitle',
               label: 'Subtitle',
               type: 'text',
-              default: this.state.form.subtitle
+              default: form.subtitle,
             }}
           >
             {Input}
           </Field>
 
-          {user.role === 'ADMIN' && !basic && (
+          {user.role === 'ADMIN' && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.type = c;
               }}
               onChange={value => {
-                this.props.onChange({
+                onChange({
                   type: value,
-                  ...(value === 'raster' && { geoInfo: true })
+                  ...(value === 'raster' && { geoInfo: true }),
                 });
               }}
               className="-fluid"
@@ -297,11 +257,11 @@ class Step1 extends React.Component {
               properties={{
                 name: 'type',
                 label: 'Type',
-                default: this.state.form.type,
-                value: this.state.form.type,
-                disabled: !!this.state.dataset,
+                default: form.type,
+                value: form.type,
+                disabled: !!datasetId,
                 required: true,
-                instanceId: 'selectType'
+                instanceId: 'selectType',
               }}
             >
               {Select}
@@ -312,17 +272,15 @@ class Step1 extends React.Component {
             ref={c => {
               if (c) FORM_ELEMENTS.elements.geoInfo = c;
             }}
-            onChange={value => this.props.onChange({ geoInfo: value.checked })}
+            onChange={value => onChange({ geoInfo: value.checked })}
             validations={['required']}
             properties={{
               name: 'geoInfo',
               label:
                 'Does this dataset contain geographical features such as points, polygons or lines?',
-              value: 'geoInfo',
               title: 'Yes',
-              disabled: this.state.form.type === 'raster',
-              defaultChecked: this.props.form.geoInfo,
-              checked: this.props.form.geoInfo
+              disabled: form.type === 'raster',
+              default: form.geoInfo,
             }}
           >
             {Checkbox}
@@ -333,32 +291,31 @@ class Step1 extends React.Component {
               if (c) FORM_ELEMENTS.elements.provider = c;
             }}
             onChange={value => {
-              this.props.onChange({
+              onChange({
                 provider: value,
                 connectorUrl: '',
                 legend: {
                   lat: undefined,
                   long: undefined,
                   date: [],
-                  country: []
+                  country: [],
                 },
                 connectorType: PROVIDER_TYPES_DICTIONARY[value]
                   ? PROVIDER_TYPES_DICTIONARY[value].connectorType
                   : null,
-                columnFields: null
               });
             }}
             className="-fluid"
             validations={['required']}
-            options={this.setProviderOptions()}
+            options={PROVIDER_OPTIONS}
             properties={{
               name: 'provider',
               label: 'Provider',
-              default: this.state.form.provider,
-              value: this.state.form.provider,
-              disabled: !!this.state.dataset,
+              default: form.provider,
+              value: form.provider,
+              disabled: !!datasetId,
               required: true,
-              instanceId: 'selectProvider'
+              instanceId: 'selectProvider',
             }}
           >
             {Select}
@@ -369,71 +326,47 @@ class Step1 extends React.Component {
            ****************** CARTODB FIELDS * ***************
            *****************************************************
            */}
-          {isCarto && !dataset && (
+          {isCarto && !datasetId && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.cartoAccountUsername = c;
               }}
-              onChange={value => {
-                this.setState(
-                  {
-                    carto: {
-                      ...this.state.carto,
-                      cartoAccountUsername: value
-                    }
-                  },
-                  () => {
-                    this.onCartoFieldsChange('cartoAccountUsername', value);
-                  }
-                );
-              }}
+              onChange={value => this.onCartoFieldsChange({ cartoAccountUsername: value })}
               validations={['required']}
               className="-fluid"
               properties={{
                 name: 'cartoAccountUsername',
                 label: 'Carto account username',
                 type: 'text',
-                default: this.state.form.cartoAccountUsername,
-                required: true
+                default: form.cartoAccountUsername,
+                required: true,
               }}
             >
               {Input}
             </Field>
           )}
 
-          {isCarto && !dataset && (
+          {isCarto && !datasetId && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.tableName = c;
               }}
-              onChange={value => {
-                this.setState(
-                  {
-                    carto: {
-                      ...this.state.carto,
-                      tableName: value
-                    }
-                  },
-                  () => {
-                    this.onCartoFieldsChange('tableName', value);
-                  }
-                );
-              }}
+              onChange={value => this.onCartoFieldsChange({ tableName: value })}
               validations={['required']}
               className="-fluid"
               properties={{
                 name: 'tableName',
                 label: 'Table name',
                 type: 'text',
-                default: this.state.form.tableName,
-                required: true
+                default: form.tableName,
+                required: true,
               }}
             >
               {Input}
             </Field>
           )}
 
-          {isCarto && !!dataset && (
+          {isCarto && !!datasetId && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.connectorUrl = c;
@@ -444,9 +377,9 @@ class Step1 extends React.Component {
                 name: 'connectorUrl',
                 label: 'connector Url',
                 type: 'text',
-                default: this.state.form.connectorUrl,
-                disabled: !!this.state.dataset,
-                required: true
+                default: form.connectorUrl,
+                disabled: !!datasetId,
+                required: true,
               }}
             >
               {Input}
@@ -463,7 +396,7 @@ class Step1 extends React.Component {
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.tableName = c;
               }}
-              onChange={value => this.props.onChange({ tableName: value })}
+              onChange={value => onChange({ tableName: value })}
               validations={['required']}
               className="-fluid"
               hint="Please add fusion table (ft:id) or an image. Example: projects/wri-datalab/HansenComposite_14-15`"
@@ -471,9 +404,9 @@ class Step1 extends React.Component {
                 name: 'tableName',
                 label: 'Asset id',
                 type: 'text',
-                default: this.state.form.tableName,
-                disabled: !!this.state.dataset,
-                required: true
+                default: form.tableName,
+                disabled: !!datasetId,
+                required: true,
               }}
             >
               {Input}
@@ -490,7 +423,7 @@ class Step1 extends React.Component {
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.tableName = c;
               }}
-              onChange={value => this.props.onChange({ tableName: value })}
+              onChange={value => onChange({ tableName: value })}
               validations={['required']}
               className="-fluid"
               hint="Please verify that the scenario and model is already incorporated in Rasdaman. Example: scenario/model"
@@ -498,9 +431,9 @@ class Step1 extends React.Component {
                 name: 'tableName',
                 label: 'Table name',
                 type: 'text',
-                default: this.state.form.tableName,
-                disabled: !!this.state.dataset,
-                required: true
+                default: form.tableName,
+                disabled: !!datasetId,
+                required: true,
               }}
             >
               {Input}
@@ -517,7 +450,7 @@ class Step1 extends React.Component {
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.connectorUrl = c;
               }}
-              onChange={value => this.props.onChange({ connectorUrl: value })}
+              onChange={value => onChange({ connectorUrl: value })}
               validations={['required', 'url']}
               className="-fluid"
               hint="Example: http://gis-gfw.wri.org/arcgis/rest/services/prep/nex_gddp_indicators/MapServer/6?f=pjson"
@@ -525,9 +458,9 @@ class Step1 extends React.Component {
                 name: 'connectorUrl',
                 label: 'Url data endpoint',
                 type: 'text',
-                default: this.state.form.connectorUrl,
-                disabled: !!this.state.dataset,
-                required: true
+                default: form.connectorUrl,
+                disabled: !!datasetId,
+                required: true,
               }}
             >
               {Input}
@@ -544,7 +477,7 @@ class Step1 extends React.Component {
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.connectorUrl = c;
               }}
-              onChange={value => this.props.onChange({ connectorUrl: value })}
+              onChange={value => onChange({ connectorUrl: value })}
               validations={['required', 'url']}
               className="-fluid"
               hint="This connector will only display the data as a wms map layer. The data will not be available through queries."
@@ -552,9 +485,9 @@ class Step1 extends React.Component {
                 name: 'connectorUrl',
                 label: 'Url data endpoint',
                 type: 'text',
-                default: this.state.form.connectorUrl,
-                disabled: !!this.state.dataset,
-                required: true
+                default: form.connectorUrl,
+                disabled: !!datasetId,
+                required: true,
               }}
             >
               {Input}
@@ -567,29 +500,31 @@ class Step1 extends React.Component {
            *****************************************************
            */}
 
-          {user.role === 'ADMIN' && !basic && (
+          {user.role === 'ADMIN' && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.subscribable = c;
               }}
-              onChange={value => this.onSubscribableCheckboxChange(value.checked)}
+              onChange={value =>
+                console.log(value) || this.onSubscribableCheckboxChange(value.checked)
+              }
               properties={{
                 name: 'subscribable',
                 title: 'Subscribable',
-                checked: Object.keys(this.state.form.subscribable).length > 0
+                default: form.subscribable.length > 0,
               }}
             >
               {Checkbox}
             </Field>
           )}
 
-          {subscribableSelected && this.state.form.subscribable.length && (
-            <h3>Subscriptions ({this.state.form.subscribable.length})</h3>
+          {subscribableSelected && form.subscribable.length && (
+            <h3>Subscriptions ({form.subscribable.length})</h3>
           )}
 
           {subscribableSelected && (
             <div>
-              {this.state.form.subscribable.map((elem, key) => (
+              {form.subscribable.map(elem => (
                 <div className="c-field-row subscription-container" key={elem.id}>
                   <div className="l-row row">
                     <div className="column small-12">
@@ -600,7 +535,7 @@ class Step1 extends React.Component {
                         onChange={type =>
                           this.onSubscribableChange({
                             type,
-                            id: elem.id
+                            id: elem.id,
                           })
                         }
                         validations={[
@@ -610,8 +545,8 @@ class Step1 extends React.Component {
                             value: elem.type,
                             default: elem.type,
                             condition: 'type',
-                            data: this.state.form.subscribable
-                          }
+                            data: form.subscribable,
+                          },
                         ]}
                         className="-fluid"
                         properties={{
@@ -619,7 +554,7 @@ class Step1 extends React.Component {
                           label: 'Type',
                           type: 'text',
                           default: elem.type,
-                          required: true
+                          required: true,
                         }}
                       >
                         {Input}
@@ -638,25 +573,25 @@ class Step1 extends React.Component {
                         className="-fluid"
                         button={
                           <button
-  type="button"
-  className="c-button -secondary"
-  onClick={() => this.onToggleSubscribableModal(elem.id)}
->
+                            type="button"
+                            className="c-button -secondary"
+                            onClick={() => this.onToggleSubscribableModal(elem.id)}
+                          >
                             Try it
-</button>
+                          </button>
                         }
                         properties={{
                           name: 'dataQuery',
                           label: 'Data query',
                           type: 'text',
                           default: elem.dataQuery,
-                          required: true
+                          required: true,
                         }}
                       >
                         {Input}
                       </Field>
 
-                      {this.state.activeSubscriptionModal === elem.id && (
+                      {activeSubscriptionModal === elem.id && (
                         <Modal isOpen onRequestClose={() => this.onToggleSubscribableModal(null)}>
                           <TrySubscriptionModal query={elem.dataQuery} />
                         </Modal>
@@ -675,25 +610,25 @@ class Step1 extends React.Component {
                         className="-fluid"
                         button={
                           <button
-  type="button"
-  className="c-button -secondary"
-  onClick={() => this.onToggleSubscribableModal(elem.id)}
->
+                            type="button"
+                            className="c-button -secondary"
+                            onClick={() => this.onToggleSubscribableModal(elem.id)}
+                          >
                             Try it
-</button>
+                          </button>
                         }
                         properties={{
                           name: 'subscriptionQuery',
                           label: 'Subscription query',
                           type: 'text',
                           default: elem.subscriptionQuery,
-                          required: true
+                          required: true,
                         }}
                       >
                         {Input}
                       </Field>
 
-                      {this.state.activeSubscriptionModal === elem.id && (
+                      {activeSubscriptionModal === elem.id && (
                         <Modal isOpen onRequestClose={() => this.onToggleSubscribableModal(null)}>
                           <TrySubscriptionModal query={elem.subscriptionQuery} />
                         </Modal>
@@ -705,7 +640,7 @@ class Step1 extends React.Component {
                         type="button"
                         className="c-button -secondary"
                         onClick={() => this.handleRemoveSubscription(elem.id)}
-                        disabled={this.state.form.subscribable.length === 1}
+                        disabled={form.subscribable.length === 1}
                       >
                         Remove
                       </button>
@@ -735,34 +670,32 @@ class Step1 extends React.Component {
            *****************************************************
            */}
 
-          {isDocument && user.role === 'ADMIN' && !basic && (
+          {isDocument && user.role === 'ADMIN' && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.verified = c;
               }}
-              onChange={value => this.props.onChange({ verified: value.checked })}
+              onChange={value => onChange({ verified: value.checked })}
               validations={['required']}
               properties={{
                 name: 'verified',
                 label: 'Is this dataset verified?',
-                value: 'verified',
                 title: 'Verified',
-                checked: this.props.form.verified
+                default: form.verified,
               }}
             >
               {Checkbox}
             </Field>
           )}
 
-          {isDocument && !dataset && (
+          {isDocument && !datasetId && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.connectorUrl = c;
               }}
-              onChange={({ fields, value }) => {
-                this.props.onChange({
+              onChange={({ value }) => {
+                onChange({
                   connectorUrl: value,
-                  ...(!!fields && { columnFields: fields })
                 });
               }}
               validations={['required', 'url']}
@@ -772,24 +705,24 @@ class Step1 extends React.Component {
                 label: 'Url data endpoint / File',
                 type: 'text',
                 placeholder: 'Paste a URL here or browse file',
-                authorization: this.state.form.authorization,
-                provider: this.state.form.provider,
-                default: this.state.form.connectorUrl,
-                disabled: !!this.state.dataset,
-                required: true
+                authorization: form.authorization,
+                provider: form.provider,
+                default: form.connectorUrl,
+                disabled: !!datasetId,
+                required: true,
               }}
             >
               {File}
             </Field>
           )}
 
-          {isDocument && !!dataset && (
+          {isDocument && !!datasetId && (
             <Field
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.connectorUrl = c;
               }}
               onChange={value => {
-                this.props.onChange({ connectorUrl: value });
+                onChange({ connectorUrl: value });
               }}
               validations={['required', 'url']}
               className="-fluid"
@@ -797,9 +730,9 @@ class Step1 extends React.Component {
                 name: 'connectorUrl',
                 label: 'Url data endpoint / File',
                 type: 'text',
-                default: this.state.form.connectorUrl,
-                disabled: !!this.state.dataset,
-                required: true
+                default: form.connectorUrl,
+                disabled: !!datasetId,
+                required: true,
               }}
             >
               {Input}
@@ -811,7 +744,7 @@ class Step1 extends React.Component {
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.dataPath = c;
               }}
-              onChange={value => this.props.onChange({ dataPath: value })}
+              onChange={value => onChange({ dataPath: value })}
               hint="Name of the element that you want to import"
               validations={isXml ? ['required'] : []}
               className="-fluid"
@@ -819,222 +752,22 @@ class Step1 extends React.Component {
                 name: 'dataPath',
                 label: 'Data path',
                 type: 'text',
-                default: this.state.form.dataPath,
-                disabled: !!this.state.dataset,
-                required: isXml
+                default: form.dataPath,
+                disabled: !!datasetId,
+                required: isXml,
               }}
             >
               {Input}
             </Field>
           )}
-
-          {dateColumns.length > 0 && (
-            <Field
-              ref={c => {
-                if (c) FORM_ELEMENTS.elements.mainDateField = c;
-              }}
-              onChange={value => this.props.onChange({ mainDateField: value })}
-              options={dateColumns}
-              className="-fluid"
-              properties={{
-                name: 'mainDateField',
-                label: 'Main date',
-                type: 'text',
-                placeholder: 'Select or type',
-                optionRenderer: this.renderMainDateOptions,
-                default: this.state.form.mainDateField
-              }}
-            >
-              {Select}
-            </Field>
-          )}
-
-          {isDocument && columnFields && (
-            <div className="c-field-row">
-              <div className="row l-row">
-                <div className="column small-12 medium-6">
-                  <Field
-                    ref={c => {
-                      if (c) FORM_ELEMENTS.elements.lat = c;
-                    }}
-                    onChange={value => this.onLegendChange({ lat: value })}
-                    hint="Name of column with latitude value"
-                    options={columnFieldsOptions}
-                    className="-fluid"
-                    properties={{
-                      name: 'lat',
-                      label: 'Latitude',
-                      type: 'text',
-                      placeholder: 'Select or type the column...',
-                      disabled: !!this.state.dataset,
-                      default: this.state.form.legend.lat
-                    }}
-                  >
-                    {Select}
-                  </Field>
-                </div>
-
-                <div className="column small-12 medium-6">
-                  <Field
-                    ref={c => {
-                      if (c) FORM_ELEMENTS.elements.long = c;
-                    }}
-                    onChange={value => this.onLegendChange({ long: value })}
-                    hint="Name of column with longitude value"
-                    options={columnFieldsOptions}
-                    className="-fluid"
-                    properties={{
-                      name: 'long',
-                      label: 'Longitude',
-                      type: 'text',
-                      placeholder: 'Select or type the column...',
-                      disabled: !!this.state.dataset,
-                      default: this.state.form.legend.long
-                    }}
-                  >
-                    {Select}
-                  </Field>
-                </div>
-
-                <div className="column small-12 medium-6">
-                  <Field
-                    ref={c => {
-                      if (c) FORM_ELEMENTS.elements.date = c;
-                    }}
-                    onChange={value => this.onLegendChange({ date: value })}
-                    hint="Name of columns with date value (ISO Format)"
-                    options={columnFieldsOptions}
-                    className="-fluid"
-                    properties={{
-                      name: 'date',
-                      label: 'Date',
-                      type: 'text',
-                      disabled: !!this.state.dataset,
-                      placeholder: 'Select or type the column..'
-                    }}
-                  >
-                    {Select}
-                  </Field>
-                </div>
-
-                <div className="column small-12 medium-6">
-                  <Field
-                    ref={c => {
-                      if (c) FORM_ELEMENTS.elements.country = c;
-                    }}
-                    onChange={value => this.onLegendChange({ country: value })}
-                    hint="Name of columns with country value (ISO3 code)"
-                    options={columnFieldsOptions}
-                    className="-fluid"
-                    properties={{
-                      name: 'country',
-                      label: 'Country',
-                      type: 'text',
-                      disabled: !!this.state.dataset,
-                      placeholder: 'Select or type the column...'
-                    }}
-                  >
-                    {Select}
-                  </Field>
-                </div>
-              </div>
-            </div>
-          )}
         </fieldset>
-
-        {this.state.form.provider && dataset && (
-          <fieldset className="c-field-container">
-            <Title className="-default -secondary">Relevant Columns</Title>
-
-            {loadingColumns && <Spinner className="-inline" isLoading={loadingColumns} />}
-
-            {!loadingColumns && !columns.length && <p>No columns</p>}
-
-            {!!columns.length && (
-              <div className="c-field-row">
-                <div className="l-row row">
-                  <div className="column small-12 medium-6">
-                    <Field
-                      options={columns.map(c => ({ label: c.name, value: c.name }))}
-                      ref={c => {
-                        if (c) FORM_ELEMENTS.elements.widgetRelevantProps = c;
-                      }}
-                      onChange={value => this.props.onChange({ widgetRelevantProps: value })}
-                      className="-fluid"
-                      properties={{
-                        name: 'widgetRelevantProps',
-                        label: 'Widget relevant columns',
-                        multi: true,
-                        instanceId: 'selectWidgetRelevantProps',
-                        placeholder: 'Select the dataset columns...',
-                        default: this.state.form.widgetRelevantProps.map(column => ({
-                          label: column,
-                          value: column
-                        })),
-                        value: this.state.form.widgetRelevantProps.map(column => ({
-                          label: column,
-                          value: column
-                        }))
-                      }}
-                    >
-                      {Select}
-                    </Field>
-                  </div>
-
-                  <div className="column small-12 medium-6">
-                    <Field
-                      options={columns.map(c => ({ label: c.name, value: c.name }))}
-                      ref={c => {
-                        if (c) FORM_ELEMENTS.elements.layerRelevantProps = c;
-                      }}
-                      onChange={value => this.props.onChange({ layerRelevantProps: value })}
-                      className="-fluid"
-                      properties={{
-                        name: 'layerRelevantProps',
-                        label: 'Layer relevant columns',
-                        multi: true,
-                        instanceId: 'selectLayerRelevantProps',
-                        placeholder: 'Select the dataset columns...',
-                        default: this.state.form.layerRelevantProps.map(column => ({
-                          label: column,
-                          value: column
-                        })),
-                        value: this.state.form.layerRelevantProps.map(column => ({
-                          label: column,
-                          value: column
-                        }))
-                      }}
-                    >
-                      {Select}
-                    </Field>
-                  </div>
-                </div>
-              </div>
-            )}
-          </fieldset>
-        )}
       </div>
     );
   }
 }
 
-Step1.propTypes = {
-  dataset: PropTypes.string,
-  form: PropTypes.object,
-  columns: PropTypes.array,
-  loadingColumns: PropTypes.bool,
-  basic: PropTypes.bool,
-  onChange: PropTypes.func,
-
-  // Store
-  user: PropTypes.object.isRequired
-};
-
 const mapStateToProps = state => ({
-  user: state.user
+  user: state.user,
 });
 
-export default connect(
-  mapStateToProps,
-  null
-)(Step1);
+export default connect(mapStateToProps)(Step1);

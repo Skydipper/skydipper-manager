@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 // components
 import Aside from 'components/ui/Aside';
-import DatasetsForm from 'components/datasets/form/DatasetsForm';
+import DatasetsForm from 'components/datasets/form';
 import MetadataForm from 'components/datasets/metadata/form/MetadataForm';
 import TagsForm from 'components/manager/tags/TagsForm';
 import LayersIndex from 'components/manager/data/layers/pages/list';
@@ -41,14 +41,7 @@ class DatasetsShow extends PureComponent {
 
             <div className="columns small-12 medium-9">
               {currentSubtab === 'edit' && (
-                <DatasetsForm
-                  application={[process.env.APPLICATIONS]}
-                  authorization={user.token}
-                  dataset={id}
-                  onSubmit={() => {
-                    Router.pushRoute('manager_data', { tab: 'datasets' });
-                  }}
-                />
+                <DatasetsForm datasetId={id} />
               )}
 
               {currentSubtab === 'metadata' && (

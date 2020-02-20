@@ -92,7 +92,7 @@ class DatasetsService {
     });
   }
 
-  fetchData({ id, applications = [process.env.APPLICATIONS], includes, filters }) {
+  fetchData({ id, applications = [process.env.APPLICATIONS], includes = '', filters = {} }) {
     const qParams = {
       application: applications.join(','),
       language: this.opts.language,
@@ -135,7 +135,7 @@ class DatasetsService {
   saveData({ type, body, id = '' }) {
     return new Promise((resolve, reject) => {
       post({
-        url: `${process.env.WRI_API_URL}/dataset/${id}`,
+        url: `${process.env.WRI_API_URL}/dataset${id ? `/${id}` : ''}`,
         type,
         body,
         headers: [

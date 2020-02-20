@@ -38,7 +38,7 @@ const fetchReducer = (state, action) => {
   }
 };
 
-const DatasetsTable = ({ token }) => {
+const DatasetsTable = ({ token, userApplications }) => {
   /**
    * @type {[any, (action: any) => void]}
    */
@@ -75,7 +75,7 @@ const DatasetsTable = ({ token }) => {
         includes: 'layer,metadata',
         'page[number]': state.page,
         'page[size]': INITIAL_PAGINATION.limit,
-        application: process.env.APPLICATIONS,
+        application: userApplications,
         ...(state.search?.length > 3 ? { name: state.search } : {}),
       },
       true,
@@ -116,6 +116,7 @@ const DatasetsTable = ({ token }) => {
 
 DatasetsTable.propTypes = {
   token: PropTypes.string.isRequired,
+  userApplications: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default DatasetsTable;
