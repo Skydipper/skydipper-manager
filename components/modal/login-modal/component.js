@@ -25,15 +25,14 @@ class LoginModal extends PureComponent {
     password: '',
     repeatPassword: '',
     register: false,
-    loading: false
+    loading: false,
   };
 
   userService = new UserService({ apiURL: process.env.CONTROL_TOWER_URL });
 
   onSubmit = e => {
     if (e) e.preventDefault();
-    FORM_ELEMENTS.validate();
-    const isValid = FORM_ELEMENTS.isValid();
+    const isValid = FORM_ELEMENTS.validate();
     const { setUser } = this.props;
     const { register, ...userSettings } = this.state;
 
@@ -106,7 +105,7 @@ class LoginModal extends PureComponent {
                       label: 'Email',
                       required: true,
                       default: email,
-                      placeholder: 'paul.smith@example.com'
+                      placeholder: 'paul.smith@example.com',
                     }}
                   >
                     {Input}
@@ -124,7 +123,7 @@ class LoginModal extends PureComponent {
                       required: true,
                       default: password,
                       type: 'password',
-                      placeholder: '*********'
+                      placeholder: '*********',
                     }}
                   >
                     {Input}
@@ -150,8 +149,8 @@ class LoginModal extends PureComponent {
                           {
                             type: 'equal',
                             data: password,
-                            condition: "Passwords don't match"
-                          }
+                            condition: "Passwords don't match",
+                          },
                         ]}
                         properties={{
                           name: 'repeat-password',
@@ -159,7 +158,7 @@ class LoginModal extends PureComponent {
                           required: true,
                           default: repeatPassword,
                           type: 'password',
-                          placeholder: '*********'
+                          placeholder: '*********',
                         }}
                       >
                         {Input}

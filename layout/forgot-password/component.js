@@ -20,8 +20,7 @@ class ForgotPassword extends PureComponent {
 
   onSubmit = e => {
     if (e) e.preventDefault();
-    FORM_ELEMENTS.validate();
-    const isValid = FORM_ELEMENTS.isValid();
+    const isValid = FORM_ELEMENTS.validate();
     const { email } = this.state;
 
     if (!isValid) return;
@@ -75,7 +74,7 @@ class ForgotPassword extends PureComponent {
                           label: 'Email',
                           required: true,
                           default: email,
-                          placeholder: 'example@resourcewatch.org'
+                          placeholder: 'example@resourcewatch.org',
                         }}
                       >
                         {Input}

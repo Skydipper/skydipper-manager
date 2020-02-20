@@ -22,7 +22,7 @@ class ResetPassword extends PureComponent {
   state = {
     password: '',
     repeatPassword: '',
-    saving: false
+    saving: false,
   };
 
   userService = new UserService({ apiURL: process.env.CONTROL_TOWER_URL });
@@ -35,8 +35,7 @@ class ResetPassword extends PureComponent {
 
   onSubmit = e => {
     if (e) e.preventDefault();
-    FORM_ELEMENTS.validate();
-    const isValid = FORM_ELEMENTS.isValid();
+    const isValid = FORM_ELEMENTS.validate();
     const { tokenEmail } = this.props;
     const { password, repeatPassword } = this.state;
 
@@ -93,7 +92,7 @@ class ResetPassword extends PureComponent {
                             required: true,
                             default: password,
                             type: 'password',
-                            placeholder: '*********'
+                            placeholder: '*********',
                           }}
                         >
                           {Input}
@@ -111,8 +110,8 @@ class ResetPassword extends PureComponent {
                             {
                               type: 'equal',
                               data: password,
-                              condition: "Passwords don't match"
-                            }
+                              condition: "Passwords don't match",
+                            },
                           ]}
                           properties={{
                             name: 'repeat-password',
@@ -120,7 +119,7 @@ class ResetPassword extends PureComponent {
                             required: true,
                             default: repeatPassword,
                             type: 'password',
-                            placeholder: '*********'
+                            placeholder: '*********',
                           }}
                         >
                           {Input}

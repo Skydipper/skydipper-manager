@@ -12,13 +12,13 @@ export const STATE_DEFAULT = {
     interactionConfig: {},
     status: 1,
     default: false,
-    published: true
-  }
+    published: true,
+  },
 };
 
 export const FORMAT = {
   options(o) {
-    return o.map((item) => {
+    return o.map(item => {
       return { label: item.column, value: item.column };
     });
   },
@@ -26,7 +26,7 @@ export const FORMAT = {
     if (!interactions || !added) {
       return [];
     }
-    return added.map((item) => {
+    return added.map(item => {
       const interaction = interactions.fields.find(field => field.label === item.column);
 
       if (interaction) {
@@ -48,39 +48,28 @@ export const FORMAT = {
       default:
         return labelLower;
     }
-  }
+  },
 };
 
 export const FORM_ELEMENTS = {
-  elements: {
-  },
+  elements: {},
   removeInteraction(interaction) {
     const { elements } = this;
-    ['Field', 'Label', 'Prefix', 'Suffix', 'Format'].map(item =>
-      delete elements[`${item.toLowerCase()}${interaction.column}`]);
+    ['Field', 'Label', 'Prefix', 'Suffix', 'Format'].map(
+      item => delete elements[`${item.toLowerCase()}${interaction.column}`]
+    );
   },
   validate() {
     const { elements } = this;
-    Object.keys(elements).forEach((k) => {
-      elements[k].validate();
-    });
+    const res = Object.keys(elements).map(k => elements[k].validate());
+    return res.every(valid => valid);
   },
-  isValid() {
-    const { elements } = this;
-    const valid = Object.keys(elements)
-      .map(k => elements[k].isValid())
-      .filter(v => v !== null)
-      .every(element => element);
-
-    return valid;
-  }
 };
-
 
 export const PROVIDER_OPTIONS = [
   { label: 'Carto', value: 'cartodb' },
   { label: 'ARCGIS: Feature service', value: 'featureservice' },
   { label: 'Leaflet', value: 'leaflet' },
   { label: 'WMS', value: 'wms' },
-  { label: 'GEE', value: 'gee' }
+  { label: 'GEE', value: 'gee' },
 ];

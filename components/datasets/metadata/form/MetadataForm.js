@@ -30,8 +30,8 @@ class MetadataForm extends React.Component {
       loadingColumns: true,
       form: Object.assign({}, STATE_DEFAULT.form, {
         application: props.application,
-        authorization: props.authorization
-      })
+        authorization: props.authorization,
+      }),
     });
 
     // -------------------- BINDING -----------------------
@@ -41,7 +41,7 @@ class MetadataForm extends React.Component {
 
     this.service = new DatasetsService({
       authorization: props.authorization,
-      language: props.locale
+      language: props.locale,
     });
 
     this.state = newState;
@@ -60,7 +60,7 @@ class MetadataForm extends React.Component {
             metadata,
             type: type || 'tabular',
             // Stop the loading
-            loading: false
+            loading: false,
           });
 
           if (metadata[0]) {
@@ -74,12 +74,12 @@ class MetadataForm extends React.Component {
                 id: this.props.dataset,
                 type,
                 provider,
-                tableName
+                tableName,
               })
               .then(columns => {
                 this.setState({
                   columns,
-                  loadingColumns: false
+                  loadingColumns: false,
                 });
               })
               .catch(err => {
@@ -109,55 +109,51 @@ class MetadataForm extends React.Component {
     event.preventDefault();
 
     // Validate the form
-    FORM_ELEMENTS.validate();
+    const valid = FORM_ELEMENTS.validate();
 
-    // Set a timeout due to the setState function of react
-    setTimeout(() => {
-      const valid = FORM_ELEMENTS.isValid();
-      if (valid) {
-        const { dataset } = this.props;
-        const { metadata, form } = this.state;
+    if (valid) {
+      const { dataset } = this.props;
+      const { metadata, form } = this.state;
 
-        // Start the submitting
-        this.setState({ submitting: true });
+      // Start the submitting
+      this.setState({ submitting: true });
 
-        // Check if the metadata alerady exists
-        const thereIsMetadata = Boolean(
-          metadata.find(m => {
-            const hasLang = m.attributes.language === form.language;
-            const hasApp = m.attributes.application === form.application;
+      // Check if the metadata alerady exists
+      const thereIsMetadata = Boolean(
+        metadata.find(m => {
+          const hasLang = m.attributes.language === form.language;
+          const hasApp = m.attributes.application === form.application;
 
-            return hasLang && hasApp;
-          })
-        );
+          return hasLang && hasApp;
+        })
+      );
 
-        // Set the request
-        const requestOptions = {
-          type: dataset && thereIsMetadata ? 'PATCH' : 'POST',
-          omit: ['authorization']
-        };
+      // Set the request
+      const requestOptions = {
+        type: dataset && thereIsMetadata ? 'PATCH' : 'POST',
+        omit: ['authorization'],
+      };
 
-        // Save the data
-        this.service
-          .saveMetadata({
-            type: requestOptions.type,
-            id: dataset,
-            body: omit(this.state.form, requestOptions.omit)
-          })
-          .then(() => {
-            toastr.success('Success', 'Metadata has been uploaded correctly');
-            if (this.props.onSubmit) {
-              this.props.onSubmit();
-            }
-          })
-          .catch(err => {
-            this.setState({ submitting: false });
-            toastr.error('Error', err);
-          });
-      } else {
-        toastr.error('Error', 'Fill all the required fields or correct the invalid values');
-      }
-    }, 0);
+      // Save the data
+      this.service
+        .saveMetadata({
+          type: requestOptions.type,
+          id: dataset,
+          body: omit(this.state.form, requestOptions.omit),
+        })
+        .then(() => {
+          toastr.success('Success', 'Metadata has been uploaded correctly');
+          if (this.props.onSubmit) {
+            this.props.onSubmit();
+          }
+        })
+        .catch(err => {
+          this.setState({ submitting: false });
+          toastr.error('Error', err);
+        });
+    } else {
+      toastr.error('Error', 'Fill all the required fields or correct the invalid values');
+    }
   }
 
   onChange(obj) {
@@ -219,16 +215,16 @@ MetadataForm.propTypes = {
   onSubmit: PropTypes.func,
   setSources: PropTypes.func,
   resetSources: PropTypes.func,
-  locale: PropTypes.string.isRequired
+  locale: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = state => ({
-  locale: state.common.locale
+  locale: state.common.locale,
 });
 
 const mapDispatchToProps = {
   setSources,
-  resetSources
+  resetSources,
 };
 
 export default connect(

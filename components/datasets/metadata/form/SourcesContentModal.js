@@ -20,12 +20,12 @@ class SourcesContentModal extends React.Component {
     setSources: PropTypes.func.isRequired,
     setTmpSources: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
-    onClose: PropTypes.func.isRequired
+    onClose: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
     sources: [{}],
-    tmpSources: []
+    tmpSources: [],
   };
 
   componentWillMount() {
@@ -42,18 +42,14 @@ class SourcesContentModal extends React.Component {
     event.preventDefault();
 
     // Validate the form
-    SOURCE_ELEMENTS.validate();
+    const valid = SOURCE_ELEMENTS.validate();
 
-    // Set a timeout due to the setState function of react
-    setTimeout(() => {
-      const valid = SOURCE_ELEMENTS.isValid();
-      if (valid) {
-        this.props.onSubmit();
-        this.props.setSources(tmpSources);
-      } else {
-        toastr.error('Error', 'Fill all the required fields or correct the invalid values');
-      }
-    }, 0);
+    if (valid) {
+      this.props.onSubmit();
+      this.props.setSources(tmpSources);
+    } else {
+      toastr.error('Error', 'Fill all the required fields or correct the invalid values');
+    }
   };
 
   render() {
@@ -95,12 +91,12 @@ class SourcesContentModal extends React.Component {
 
 const mapStateToProps = ({ sources }) => ({
   sources: sources.sources,
-  tmpSources: sources.tmpSources
+  tmpSources: sources.tmpSources,
 });
 
 const mapDispatchToProps = {
   setSources,
-  setTmpSources
+  setTmpSources,
 };
 
 export default connect(

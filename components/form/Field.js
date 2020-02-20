@@ -5,61 +5,64 @@ import classnames from 'classnames';
 class Field extends PureComponent {
   static propTypes = {
     properties: PropTypes.object.isRequired,
-    hint: PropTypes.string,
+    children: PropTypes.elementType.isRequired,
     className: PropTypes.string,
-    button: PropTypes.node,
-    children: PropTypes.any.isRequired
+    hint: PropTypes.string,
+    button: PropTypes.element,
   };
 
   static defaultProps = {
+    className: null,
     hint: null,
     button: null,
-    className: null
+  };
+
+  state = {
+    valid: true,
+    errors: [],
   };
 
   constructor(props) {
     super(props);
 
-    this.state = {
-      valid: null,
-      error: []
-    };
+    this.onValid = this.onValid.bind(this);
   }
 
-  onValid = (valid, error) => {
+  onValid(valid, errors) {
     this.setState({
       valid,
-      error
+      errors,
     });
-  };
+  }
 
   validate() {
-    this.child.triggerValidate();
+    const { valid } = this.child.triggerValidate();
+    return valid;
   }
 
   isValid() {
-    return this.state.valid;
+    const { valid } = this.state;
+    return valid;
   }
 
   render() {
     const { properties, children, className, hint, button } = this.props;
-    const { valid, error } = this.state;
+    const { valid, errors } = this.state;
 
-    // Set classes
     const fieldClasses = classnames({
       [className]: !!className,
-      '-disabled': properties.disabled,
+      '-disabled': !!properties.disabled,
       '-valid': valid === true,
-      '-error': valid === false
+      '-error': valid === false,
     });
+
+    const Children = children;
 
     return (
       <div className={`c-field ${fieldClasses}`}>
         {properties.label && (
           <label htmlFor={`input-${properties.name}`} className="label">
-            {properties.label} 
-{' '}
-{properties.required && <abbr title="required">*</abbr>}
+            {properties.label} {properties.required && <abbr title="required">*</abbr>}
           </label>
         )}
 
@@ -68,10 +71,12 @@ class Field extends PureComponent {
         <div className="field-container">
           {React.isValidElement(children) && children}
           {children && typeof children === 'function' && (
-            <this.props.children
+            <Children
               {...this.props}
-              ref={c => {
-                if (c) this.child = c;
+              ref={node => {
+                if (node) {
+                  this.child = node;
+                }
               }}
               onValid={this.onValid}
             />
@@ -80,16 +85,14 @@ class Field extends PureComponent {
           {!!button && button}
         </div>
 
-        {error &&
-          error.map((err, i) => {
-            if (err) {
-              return (
-                <p key={i} className="error">
-                  {err.message || err.detail}
-                </p>
-              );
-            }
-            return null;
+        {errors
+          .filter(error => !!error)
+          .map(err => {
+            return (
+              <p key={err.message || err.detail} className="error">
+                {err.message || err.detail}
+              </p>
+            );
           })}
       </div>
     );

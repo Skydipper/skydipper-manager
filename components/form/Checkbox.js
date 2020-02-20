@@ -5,25 +5,25 @@ import Icon from '../ui/Icon';
 
 import FormElement from './FormElement';
 
-
 export default class Checkbox extends FormElement {
-  /**
-   * UI EVENTS
-   * - triggerChange
-  */
-  triggerChange(evt) {
-    const { value } = this.props.properties;
+  triggerChange(e) {
+    const value = e.currentTarget.checked;
 
-    this.props.onChange && this.props.onChange({
-      value,
-      checked: evt.currentTarget.checked
+    this.setState({ value }, () => {
+      if (this.props.onChange) {
+        this.props.onChange({
+          checked: value,
+        });
+      }
     });
   }
 
   render() {
-    const { name, value, title, className } = this.props.properties;
+    const { name, title, className } = this.props.properties;
+    const { value } = this.state;
+
     const customClassName = classnames({
-      [className]: !!className
+      [className]: !!className,
     });
 
     return (
@@ -32,6 +32,7 @@ export default class Checkbox extends FormElement {
           {...this.props.properties}
           type="checkbox"
           id={`checkbox-${name}-${value}`}
+          checked={value}
           onChange={this.triggerChange}
         />
         <label htmlFor={`checkbox-${name}-${value}`}>
@@ -47,5 +48,5 @@ export default class Checkbox extends FormElement {
 
 Checkbox.propTypes = {
   properties: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };

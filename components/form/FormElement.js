@@ -1,43 +1,55 @@
-import React from 'react';
+import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
 
 import Validator from './Validator';
 
-class FormElement extends React.Component {
+class FormElement extends PureComponent {
+  static propTypes = {
+    validations: PropTypes.array,
+    properties: PropTypes.object.isRequired,
+    onValid: PropTypes.func.isRequired,
+  };
+
+  static defaultProps = {
+    validations: [],
+  };
+
   constructor(props) {
     super(props);
 
-    this.state = {
-      // NOTE: Please add a default value such as ''
-      // otherwise React will throw a warning
-      value: this.props.properties.default || '',
-      valid: null,
-      error: []
-    };
-
-    // VALIDATOR
     this.validator = new Validator();
 
-    // BINDINGS
+    this.state = {
+      value:
+        props.properties.default === null || props.properties.default === undefined
+          ? ''
+          : props.properties.default,
+    };
+
     this.triggerChange = this.triggerChange.bind(this);
     this.triggerValidate = this.triggerValidate.bind(this);
   }
 
   componentDidMount() {
-    if (this.state.value && this.state.value.length) {
+    const { value } = this.state;
+
+    if (value && value.length) {
       this.triggerValidate();
     }
   }
 
   componentWillReceiveProps(nextProps) {
+    const { value } = this.state;
+
     const hasValue = Object.prototype.hasOwnProperty.call(nextProps.properties, 'value');
-    const isNew = nextProps.properties.value !== this.state.value;
+    const isNew = nextProps.properties.value !== value;
+
     if (hasValue && isNew) {
       this.setState(
         {
-          value: nextProps.properties.value
+          value: nextProps.properties.value,
         },
         () => {
           this.triggerValidate();
@@ -56,48 +68,22 @@ class FormElement extends React.Component {
   }
 
   triggerValidate() {
-    const { validations: validationsProps } = this.props;
-    const { validations: validationsState, value } = this.state;
+    const { validations, onValid } = this.props;
+    const { value } = this.state;
 
-    const validations = validationsState || validationsProps;
+    let valid = true;
+    let errors = [];
 
-    const isValuePresent = Array.isArray(value) ? value.length > 0 : value;
-    let valid;
-    let error;
-
-    // Check if it has validations &&
-    //       if a value is defined ||
-    //       if required validation is present
-    if (validations && (isValuePresent || validations.indexOf('required') !== -1)) {
+    if (validations) {
       const validateArr = this.validator.validate(validations, value);
       valid = validateArr.every(element => element.valid);
-      error = !valid ? validateArr.map(element => element.error) : [];
-    } else {
-      valid = isValuePresent ? true : null;
-      error = [];
+      errors = !valid ? validateArr.map(element => element.error) : [];
     }
 
-    // Save the valid and the error in the state
-    this.setState(
-      {
-        valid,
-        error
-      },
-      () => {
-        if (this.props.onValid) this.props.onValid(valid, error);
-      }
-    );
-  }
+    onValid(valid, errors);
 
-  isValid() {
-    return this.state.valid;
+    return { valid, errors };
   }
 }
-
-FormElement.propTypes = {
-  properties: PropTypes.object.isRequired,
-  validations: PropTypes.array,
-  onValid: PropTypes.func
-};
 
 export default FormElement;
