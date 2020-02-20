@@ -1,6 +1,7 @@
 // routes.js
 const nextRoutes = require('next-routes');
 
+// @ts-ignore Types are broken
 const routes = nextRoutes();
 
 // ------- MANAGER  ---------------------
@@ -40,4 +41,8 @@ routes.add('profile', '/profile', 'profile');
 // routes.add('manager_faqs', '/manager/faqs/:tab?', 'manager/faqs');
 // routes.add('manager_faqs_detail', '/manager/faqs/:tab/:id/:subtab?', 'manager/faqs-detail');
 
-module.exports = routes;
+const exportedModule = routes;
+exportedModule.Link = routes.Link;
+exportedModule.Router = routes.Router;
+
+module.exports = exportedModule;
