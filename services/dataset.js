@@ -56,13 +56,12 @@ export const fetchDatasets = (params = {}, includeMeta, token) => {
 };
 
 /**
- * fetches data for a specific dataset.
- *
- * @param {String} id - dataset id.
- * @param {Object[]} params - params sent to the API.
- * @returns {Object} serialized specified dataset.
+ * Fetch a dataset
+ * @param {string} id Dataset ID
+ * @param {string} token User's token
+ * @param {object} params Additional params to send
  */
-export const fetchDataset = (id, params = {}) => {
+export const fetchDataset = (id, token, params = {}) => {
   if (!id) throw Error('dataset id is mandatory to perform this fetching.');
   logger.info(`Fetches dataset: ${id}`);
 
@@ -70,9 +69,10 @@ export const fetchDataset = (id, params = {}) => {
     headers: {
       ...WRIAPI.defaults.headers,
       // TO-DO: forces the API to not cache, this should be removed at some point
-      'Upgrade-Insecure-Requests': 1
+      'Upgrade-Insecure-Requests': 1,
+      Authorization: token,
     },
-    params
+    params,
   })
     .then(response => {
       const { status, statusText, data } = response;

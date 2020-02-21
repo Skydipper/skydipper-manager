@@ -4,10 +4,11 @@ import { connect } from 'react-redux';
 import LayoutManagerDataDetail from './component';
 
 export default connect(
+  /** @type {(state: any) => any} state */
   state => ({
-    query: state.routes.query,
-    user: state.user,
-    locale: state.common.locale
+    id: state.routes.query.id,
+    tab: state.routes.query.tab,
+    token: state.user.token,
   }),
   null
 )(LayoutManagerDataDetail);

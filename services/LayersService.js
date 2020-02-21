@@ -125,14 +125,13 @@ export const fetchLayers = (params = {}, includeMeta, token) => {
 };
 
 /**
- * Fetches a layer according to widget id and params.
- *
- * @param {String} id - layer id.
- * @param {Object[]} params - params sent to the API.
- * @returns {Object[]} - serialized specific layer.
+ * Fetch a layer
+ * @param {string} id Layer ID
+ * @param {string} token User's token
+ * @param {object} params Additional params to send
  */
 
-export const fetchLayer = (id, params = {}) => {
+export const fetchLayer = (id, token, params = {}) => {
   if (!id) throw Error('layer id is mandatory to perform this fetching.');
   logger.info(`Fetches layer: ${id}`);
 
@@ -140,11 +139,12 @@ export const fetchLayer = (id, params = {}) => {
     headers: {
       ...WRIAPI.defaults.headers,
       // TO-DO: forces the API to not cache, this should be removed at some point
-      'Upgrade-Insecure-Requests': 1
+      'Upgrade-Insecure-Requests': 1,
+      Authorization: token,
     },
     params: {
       application: process.env.APPLICATIONS,
-      ...params
+      ...params,
     },
     transformResponse: [].concat(WRIAPI.defaults.transformResponse, ({ data }) => data)
   })

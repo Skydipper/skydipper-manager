@@ -1,128 +1,70 @@
-import React, { PureComponent } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { singular } from 'pluralize';
-import { toastr } from 'react-redux-toastr';
 
-// components
+import { fetchDataset } from 'services/dataset';
+import { fetchLayer } from 'services/LayersService';
+import { capitalizeFirstLetter } from 'utils/utils';
 import Layout from 'layout/layout/layout-manager';
 import Breadcrumbs from 'components/ui/Breadcrumbs';
 import DatasetsTab from 'components/manager/data/datasets';
 import LayersTab from 'components/manager/data/layers';
 
-// services
-import { fetchDataset } from 'services/dataset';
-import { fetchLayer } from 'services/LayersService';
+const LayoutAdminDataDetail = ({ id, tab, token }) => {
+  const [name, setName] = useState('−');
 
-// utils
-import { capitalizeFirstLetter } from 'utils/utils';
+  useEffect(() => {
+    const fetchData = tab === 'datasets' ? fetchDataset : fetchLayer;
 
-class LayoutAdminDataDetail extends PureComponent {
-  static propTypes = { query: PropTypes.object.isRequired };
-
-  state = { data: null };
-
-  componentWillMount() {
-    const {
-      query: { id }
-    } = this.props;
-
-    if (id === 'new') return;
-
-    this.getData();
-  }
-
-  getName() {
-    const {
-      query: { tab, id }
-    } = this.props;
-    const { data } = this.state;
-
-    if (id === 'new') return `New ${singular(tab)}`;
-    if (data && data.name) return data.name;
-
-    return '-';
-  }
-
-  getData() {
-    const {
-      query: { tab, id }
-    } = this.props;
-
-    if (tab === 'datasets') {
-      fetchDataset(id)
-        .then(dataset => {
-          this.setState({ data: dataset });
+    if (id === 'new') {
+      setName(`New ${singular(tab)}`);
+    } else if (id) {
+      fetchData(id, token)
+        .then(data => {
+          setName(data.name);
         })
-        .catch(err => {
-          toastr.error('Error', err.message);
-        });
+        // We don't care about the error case because it's just about the title of the page
+        .catch(() => null);
     }
+  }, [id, tab, token]);
 
-    if (tab === 'layers') {
-      fetchLayer(id)
-        .then(layer => {
-          this.setState({ data: layer });
-        })
-        .catch(err => {
-          toastr.error('Error', err.message);
-        });
-    }
-  }
-
-  render() {
-    const {
-      query: { tab, dataset }
-    } = this.props;
-
-    return (
-      <Layout
-        title={this.getName()}
-        // TO-DO: fill description
-        description="Data detail..."
-      >
-        <div className="c-page-header -manager">
-          <div className="l-container -manager">
-            <div className="row">
-              <div className="column small-12">
-                <div className="page-header-content">
-                  {dataset && tab !== 'datasets' && (
-                    <Breadcrumbs
-                      items={[
-                        {
-                          name: capitalizeFirstLetter(tab),
-                          route: 'manager_data_detail',
-                          params: { tab: 'datasets', subtab: tab, id: dataset }
-                        }
-                      ]}
-                    />
-                  )}
-                  {!dataset && (
-                    <Breadcrumbs
-                      items={[
-                        { name: capitalizeFirstLetter(tab), route: 'manager_data', params: { tab } }
-                      ]}
-                    />
-                  )}
-                  <h1>{this.getName()}</h1>
-                </div>
+  return (
+    <Layout title={name} description="Dataset details">
+      <div className="c-page-header -manager">
+        <div className="l-container -manager">
+          <div className="row">
+            <div className="column small-12">
+              <div className="page-header-content">
+                <Breadcrumbs
+                  items={[
+                    { name: capitalizeFirstLetter(tab), route: 'manager_data', params: { tab } },
+                  ]}
+                />
+                <h1>{name}</h1>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="c-page-section">
-          <div className="l-container -manager">
-            <div className="row">
-              <div className="column small-12">
-                {tab === 'datasets' && <DatasetsTab />}
-                {tab === 'layers' && <LayersTab />}
-              </div>
+      <div className="c-page-section">
+        <div className="l-container -manager">
+          <div className="row">
+            <div className="column small-12">
+              {tab === 'datasets' && <DatasetsTab />}
+              {tab === 'layers' && <LayersTab />}
             </div>
           </div>
         </div>
-      </Layout>
-    );
-  }
-}
+      </div>
+    </Layout>
+  );
+};
+
+LayoutAdminDataDetail.propTypes = {
+  id: PropTypes.string.isRequired,
+  tab: PropTypes.string.isRequired,
+  token: PropTypes.string.isRequired,
+};
 
 export default LayoutAdminDataDetail;
