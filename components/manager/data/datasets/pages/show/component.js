@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import Aside from 'components/ui/Aside';
 import DatasetsForm from 'components/datasets/form';
 import MetadataForm from 'components/datasets/metadata/form';
-import TagsForm from 'components/manager/tags/TagsForm';
 import LayersIndex from 'components/manager/data/layers/pages/list';
 
 const DatasetsShow = ({ id, tabs, selectedTab }) => {
@@ -27,8 +26,6 @@ const DatasetsShow = ({ id, tabs, selectedTab }) => {
             {selectedTab === 'edit' && <DatasetsForm datasetId={id} />}
 
             {selectedTab === 'metadata' && <MetadataForm datasetId={id} />}
-
-            {selectedTab === 'tags' && <TagsForm dataset={id} />}
 
             {selectedTab === 'layers' && <LayersIndex />}
           </div>
