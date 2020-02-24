@@ -27,7 +27,7 @@ const DatasetsShow = ({ id, tabs, selectedTab }) => {
 
             {selectedTab === 'metadata' && <MetadataForm datasetId={id} />}
 
-            {selectedTab === 'layers' && <LayersIndex />}
+            {selectedTab === 'layers' && <LayersIndex datasetId={id} />}
           </div>
         </div>
       </StickyContainer>

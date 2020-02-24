@@ -17,12 +17,12 @@ export default class LayersService {
         headers: [
           {
             key: 'Content-Type',
-            value: 'application/json'
+            value: 'application/json',
           },
           {
             key: 'Authorization',
-            value: this.opts.authorization
-          }
+            value: this.opts.authorization,
+          },
         ],
         onSuccess: response => {
           const fieldsObj = response.fields;
@@ -32,13 +32,13 @@ export default class LayersService {
             fields: ((fieldsObj && Object.keys(fieldsObj)) || []).map(fKey => {
               const { type } = fieldsObj[fKey] || null;
               return { label: fKey || '', value: fKey || '', type };
-            })
+            }),
           };
           resolve({ ...parsedData });
         },
         onError: error => {
           reject(error);
-        }
+        },
       });
     });
   }
@@ -52,22 +52,22 @@ export default class LayersService {
         headers: [
           {
             key: 'Content-Type',
-            value: 'application/json'
+            value: 'application/json',
           },
           {
             key: 'Authorization',
-            value: this.opts.authorization
-          }
+            value: this.opts.authorization,
+          },
         ],
         onSuccess: response => {
           resolve({
             ...response.data.attributes,
-            id: response.data.id
+            id: response.data.id,
           });
         },
         onError: error => {
           reject(error);
-        }
+        },
       });
     });
   }
@@ -75,28 +75,29 @@ export default class LayersService {
 
 /**
  * Fetchs layers
- * @param {any} params Query params to send to the API
- * @param {boolean} includeMeta Whether to return the meta information
  * @param {string} token The user's token
+ * @param {boolean} includeMeta Whether to return the meta information
+ * @param {string} datasetId Only fetch the layers of that dataset
+ * @param {any} params Query params to send to the API
  */
-export const fetchLayers = (params = {}, includeMeta, token) => {
+export const fetchLayers = (token, includeMeta, datasetId, params = {}) => {
   logger.info('fetches layers');
 
-  return WRIAPI.get('/layer', {
+  return WRIAPI.get(datasetId ? `/dataset/${datasetId}/layer` : '/layer', {
     headers: {
       ...WRIAPI.defaults.headers,
       // TO-DO: forces the API to not cache, this should be removed at some point
       'Upgrade-Insecure-Requests': 1,
-      ...(token ? { Authorization: token } : {})
+      ...(token ? { Authorization: token } : {}),
     },
     params: {
       env: process.env.API_ENV,
-      ...params
+      ...params,
     },
     transformResponse: [].concat(WRIAPI.defaults.transformResponse, ({ data, meta }) => ({
       layers: data,
-      meta
-    }))
+      meta,
+    })),
   })
     .then(response => {
       const { status, statusText, data } = response;
@@ -110,7 +111,7 @@ export const fetchLayers = (params = {}, includeMeta, token) => {
       if (includeMeta) {
         return {
           layers: WRISerializer({ data: layers }),
-          meta
+          meta,
         };
       }
 
@@ -146,7 +147,7 @@ export const fetchLayer = (id, token, params = {}) => {
       application: process.env.APPLICATIONS,
       ...params,
     },
-    transformResponse: [].concat(WRIAPI.defaults.transformResponse, ({ data }) => data)
+    transformResponse: [].concat(WRIAPI.defaults.transformResponse, ({ data }) => data),
   })
     .then(response => {
       const { status, statusText, data } = response;
@@ -182,8 +183,8 @@ export const deleteLayer = (layerId, datasetId, token) => {
   return WRIAPI.delete(`/dataset/${datasetId}/layer/${layerId}`, {
     headers: {
       ...WRIAPI.defaults.headers,
-      Authorization: token
-    }
+      Authorization: token,
+    },
   })
     .then(response => {
       const { status, statusText } = response;

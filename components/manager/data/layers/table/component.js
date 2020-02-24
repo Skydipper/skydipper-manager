@@ -37,7 +37,7 @@ const fetchReducer = (state, action) => {
   }
 };
 
-const LayersTable = ({ token }) => {
+const LayersTable = ({ datasetId, token }) => {
   /**
    * @type {[any, (action: any) => void]}
    */
@@ -69,20 +69,16 @@ const LayersTable = ({ token }) => {
   useEffect(() => {
     dispatch({ type: 'FETCH_INIT' });
 
-    fetchLayers(
-      {
-        includes: 'user',
-        'page[number]': state.page,
-        'page[size]': INITIAL_PAGINATION.limit,
-        application: process.env.APPLICATIONS,
-        ...(state.search?.length > 3 ? { name: state.search } : {}),
-      },
-      true,
-      token
-    )
+    fetchLayers(token, true, datasetId, {
+      includes: 'user',
+      'page[number]': state.page,
+      'page[size]': INITIAL_PAGINATION.limit,
+      application: process.env.APPLICATIONS,
+      ...(state.search?.length > 3 ? { name: state.search } : {}),
+    })
       .then(data => dispatch({ type: 'FETCH_SUCCESS', payload: data }))
       .catch(() => dispatch({ type: 'FETCH_FAILURE' }));
-  }, [state.page, state.search, state.refetch, token]);
+  }, [state.page, state.search, state.refetch, token, datasetId]);
 
   return (
     <div className="c-layer-table">
@@ -117,7 +113,12 @@ const LayersTable = ({ token }) => {
 };
 
 LayersTable.propTypes = {
+  datasetId: PropTypes.string,
   token: PropTypes.string.isRequired,
+};
+
+LayersTable.defaultProps = {
+  datasetId: undefined,
 };
 
 export default LayersTable;

@@ -1,33 +1,22 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
-// components
 import LayersTable from 'components/manager/data/layers/table';
 
-class LayersIndex extends PureComponent {
-  static propTypes = {
-    user: PropTypes.object.isRequired,
-    dataset: PropTypes.string
-  };
+const LayersIndex = ({ datasetId }) => {
+  return (
+    <div className="c-layers-index">
+      <LayersTable datasetId={datasetId} />
+    </div>
+  );
+};
 
-  static defaultProps = { dataset: null };
+LayersIndex.propTypes = {
+  datasetId: PropTypes.string,
+};
 
-  render() {
-    const {
-      user: { token },
-      dataset
-    } = this.props;
-
-    return (
-      <div className="c-layers-index">
-        <LayersTable
-          application={[process.env.APPLICATIONS]}
-          dataset={dataset}
-          authorization={token}
-        />
-      </div>
-    );
-  }
-}
+LayersIndex.defaultProps = {
+  datasetId: undefined,
+};
 
 export default LayersIndex;
