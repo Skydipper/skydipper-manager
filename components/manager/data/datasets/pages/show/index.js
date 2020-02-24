@@ -1,16 +1,14 @@
 import { connect } from 'react-redux';
 
-// component
+import { parseTabs } from './selectors';
 import DatasetsNew from './component';
 
-// selectors
-import { parseTabs } from './selectors';
-
 export default connect(
+  /** @type {(state: any) => any} state */
   state => ({
-    user: state.user,
-    query: state.routes.query,
-    tabs: parseTabs(state)
+    tabs: parseTabs(state),
+    id: state.routes.query.id,
+    selectedTab: state.routes.query.subtab,
   }),
   null
 )(DatasetsNew);

@@ -27,7 +27,7 @@ class Validator {
       url: {
         validate(value) {
           const regex = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
-          return regex.test(value || '');
+          return !value || regex.test(value);
         },
         message() {
           return 'The field should be an url: http://example.com';

@@ -1,73 +1,51 @@
-import React, { PureComponent } from 'react';
-import { Router } from 'routes';
+import React from 'react';
 import { StickyContainer, Sticky } from 'react-sticky';
 import PropTypes from 'prop-types';
 
-// components
 import Aside from 'components/ui/Aside';
 import DatasetsForm from 'components/datasets/form';
-import MetadataForm from 'components/datasets/metadata/form/MetadataForm';
+import MetadataForm from 'components/datasets/metadata/form';
 import TagsForm from 'components/manager/tags/TagsForm';
 import LayersIndex from 'components/manager/data/layers/pages/list';
 
-class DatasetsShow extends PureComponent {
-  static propTypes = {
-    tabs: PropTypes.array.isRequired,
-    query: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired
-  };
-
-  render() {
-    const {
-      user,
-      tabs,
-      query: { subtab, id }
-    } = this.props;
-    const currentSubtab = subtab || 'edit';
-
-    return (
-      <div className="c-datasets-show">
-        <StickyContainer>
-          <div className="row l-row">
-            <div className="columns small-12 medium-3">
-              <Sticky>
-                {({ style }) => (
-                  <div style={style}>
-                    <Aside items={tabs} selected={currentSubtab} />
-                  </div>
-                )}
-              </Sticky>
-            </div>
-
-            <div className="columns small-12 medium-9">
-              {currentSubtab === 'edit' && (
-                <DatasetsForm datasetId={id} />
-              )}
-
-              {currentSubtab === 'metadata' && (
-                <MetadataForm
-                  application={process.env.APPLICATIONS}
-                  authorization={user.token}
-                  dataset={id}
-                  onSubmit={() => {
-                    Router.pushRoute('manager_data', { tab: 'datasets', id });
-                  }}
-                />
-              )}
-
-              {currentSubtab === 'tags' && (
-                <div>
-                  <TagsForm dataset={id} user={user} />
+const DatasetsShow = ({ id, tabs, selectedTab }) => {
+  return (
+    <div className="c-datasets-show">
+      <StickyContainer>
+        <div className="row l-row">
+          <div className="columns small-12 medium-3">
+            <Sticky>
+              {({ style }) => (
+                <div style={style}>
+                  <Aside items={tabs} selected={selectedTab} />
                 </div>
               )}
-
-              {currentSubtab === 'layers' && <LayersIndex />}
-            </div>
+            </Sticky>
           </div>
-        </StickyContainer>
-      </div>
-    );
-  }
-}
+
+          <div className="columns small-12 medium-9">
+            {selectedTab === 'edit' && <DatasetsForm datasetId={id} />}
+
+            {selectedTab === 'metadata' && <MetadataForm datasetId={id} />}
+
+            {selectedTab === 'tags' && <TagsForm dataset={id} />}
+
+            {selectedTab === 'layers' && <LayersIndex />}
+          </div>
+        </div>
+      </StickyContainer>
+    </div>
+  );
+};
+
+DatasetsShow.propTypes = {
+  id: PropTypes.string.isRequired,
+  tabs: PropTypes.arrayOf(PropTypes.object).isRequired,
+  selectedTab: PropTypes.string,
+};
+
+DatasetsShow.defaultProps = {
+  selectedTab: 'edit',
+};
 
 export default DatasetsShow;
