@@ -28,7 +28,7 @@ const fetchReducer = (state, action) => {
                 dataQuery: action.payload.subscribable[key].dataQuery,
                 subscriptionQuery: action.payload.subscribable[key].subscriptionQuery,
               }))
-            : undefined,
+            : [],
         },
       };
     case 'FETCH_FAILURE':
