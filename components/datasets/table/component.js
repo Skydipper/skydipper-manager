@@ -75,7 +75,7 @@ const DatasetsTable = ({ token, userApplications }) => {
         includes: 'layer,metadata',
         'page[number]': state.page,
         'page[size]': INITIAL_PAGINATION.limit,
-        application: userApplications,
+        application: userApplications.join(','),
         ...(state.search?.length > 3 ? { name: state.search } : {}),
       },
       true,
