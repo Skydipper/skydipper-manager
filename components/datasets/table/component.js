@@ -83,7 +83,7 @@ const DatasetsTable = ({ token, userApplications }) => {
     )
       .then(data => dispatch({ type: 'FETCH_SUCCESS', payload: data }))
       .catch(() => dispatch({ type: 'FETCH_FAILURE' }));
-  }, [state.page, state.search, state.refetch, token]);
+  }, [state.page, state.search, state.refetch, token, userApplications]);
 
   return (
     <div className="c-dataset-table">
