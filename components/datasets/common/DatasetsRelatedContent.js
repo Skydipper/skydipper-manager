@@ -17,7 +17,6 @@ class DatasetsRelatedContent extends React.Component {
   BUTTONS = {
     layer: true,
     metadata: true,
-    tags: true
   };
 
   constructor(props) {
@@ -26,7 +25,6 @@ class DatasetsRelatedContent extends React.Component {
     this.state = {
       layersActive: false,
       metadataActive: false,
-      vocabulariesActive: false
     };
 
     // BINDINGS
@@ -38,7 +36,6 @@ class DatasetsRelatedContent extends React.Component {
       ...{
         layersActive: false,
         metadataActive: false,
-        vocabulariesActive: false
       },
       [specificDropdown]: to
     });
@@ -47,16 +44,6 @@ class DatasetsRelatedContent extends React.Component {
   render() {
     const { dataset, user, route } = this.props;
     const buttons = { ...this.BUTTONS, ...this.props.buttons };
-
-    let numberOfTags = 0;
-    let knowledgeGraphVoc = null;
-    // Calculate the number of tags for the current dataset
-    if (dataset.vocabulary && dataset.vocabulary.length) {
-      knowledgeGraphVoc = dataset.vocabulary.find(voc => voc.name === 'knowledge_graph');
-      if (knowledgeGraphVoc) {
-        numberOfTags = knowledgeGraphVoc.tags.length;
-      }
-    }
 
     const isOwnerOrAdmin = dataset.userId === user.id || user.role === 'ADMIN';
 
@@ -160,54 +147,6 @@ layers
                     <span>{(dataset.metadata && dataset.metadata.length) || 0}
 {' '}
 metadata
-</span>
-                  </div>
-                )}
-              </TetherComponent>
-            </li>
-          )}
-
-          {route !== 'profile_detail' && buttons.tags && (
-            <li>
-              <TetherComponent
-                attachment="bottom center"
-                constraints={[
-                  {
-                    to: 'window'
-                  }
-                ]}
-                targetOffset="-4px 0"
-                classes={{
-                  element: 'c-tooltip'
-                }}
-              >
-                {isOwnerOrAdmin ? (
-                  <Link route={route} params={{ tab: 'datasets', id: dataset.id, subtab: 'tags' }}>
-                    <a
-                      className={classnames({ '-empty': !knowledgeGraphVoc })}
-                      onMouseEnter={() => this.toggleTooltip('vocabulariesActive', true)}
-                      onMouseLeave={() => this.toggleTooltip('vocabulariesActive', false)}
-                    >
-                      <Icon name="icon-type" className="c-icon -smaller" />
-                      <span>{numberOfTags}</span>
-                    </a>
-                  </Link>
-                ) : (
-                  <a
-                    className={classnames({ '-empty': !knowledgeGraphVoc })}
-                    onMouseEnter={() => this.toggleTooltip('vocabulariesActive', true)}
-                    onMouseLeave={() => this.toggleTooltip('vocabulariesActive', false)}
-                  >
-                    <Icon name="icon-type" className="c-icon -smaller" />
-                    <span>{numberOfTags}</span>
-                  </a>
-                )}
-
-                {this.state.vocabulariesActive && (
-                  <div>
-                    <span>{numberOfTags}
-{' '}
-tags
 </span>
                   </div>
                 )}
