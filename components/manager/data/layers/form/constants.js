@@ -1,19 +1,13 @@
-export const STATE_DEFAULT = {
-  step: 1,
-  stepLength: 1,
-  submitting: false,
-  loading: false,
-  form: {
-    name: '',
-    description: '',
-    provider: null,
-    layerConfig: {},
-    legendConfig: {},
-    interactionConfig: {},
-    status: 1,
-    default: false,
-    published: true,
-  },
+export const FORM_DEFAULT_STATE = {
+  name: '',
+  description: '',
+  provider: null,
+  layerConfig: {},
+  legendConfig: {},
+  interactionConfig: {},
+  status: 1,
+  default: false,
+  published: true,
 };
 
 export const FORMAT = {

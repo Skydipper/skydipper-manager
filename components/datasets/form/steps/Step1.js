@@ -505,9 +505,7 @@ class Step1 extends PureComponent {
               ref={c => {
                 if (c) FORM_ELEMENTS.elements.subscribable = c;
               }}
-              onChange={value =>
-                console.log(value) || this.onSubscribableCheckboxChange(value.checked)
-              }
+              onChange={value => this.onSubscribableCheckboxChange(value.checked)}
               properties={{
                 name: 'subscribable',
                 title: 'Subscribable',
@@ -571,15 +569,15 @@ class Step1 extends PureComponent {
                         }
                         validations={['required']}
                         className="-fluid"
-                        button={
-                          <button
-                            type="button"
-                            className="c-button -secondary"
-                            onClick={() => this.onToggleSubscribableModal(elem.id)}
-                          >
+                        button={(
+<button
+  type="button"
+  className="c-button -secondary"
+  onClick={() => this.onToggleSubscribableModal(elem.id)}
+>
                             Try it
-                          </button>
-                        }
+</button>
+)}
                         properties={{
                           name: 'dataQuery',
                           label: 'Data query',
@@ -608,15 +606,15 @@ class Step1 extends PureComponent {
                         }
                         validations={['required']}
                         className="-fluid"
-                        button={
-                          <button
-                            type="button"
-                            className="c-button -secondary"
-                            onClick={() => this.onToggleSubscribableModal(elem.id)}
-                          >
+                        button={(
+<button
+  type="button"
+  className="c-button -secondary"
+  onClick={() => this.onToggleSubscribableModal(elem.id)}
+>
                             Try it
-                          </button>
-                        }
+</button>
+)}
                         properties={{
                           name: 'subscriptionQuery',
                           label: 'Subscription query',

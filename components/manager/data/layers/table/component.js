@@ -91,6 +91,7 @@ const LayersTable = ({ datasetId, token }) => {
           params: {
             tab: 'layers',
             id: 'new',
+            ...(datasetId ? { datasetId } : {}),
           },
         }}
         onSearch={onSearch}

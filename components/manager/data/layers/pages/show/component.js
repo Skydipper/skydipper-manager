@@ -1,38 +1,19 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 // components
-import LayersForm from 'components/manager/data/layers/form/LayersForm';
+import LayersForm from 'components/manager/data/layers/form';
 
-class LayersShow extends PureComponent {
-  static propTypes = {
-    dataset: PropTypes.string.isRequired,
-    user: PropTypes.object.isRequired
-  };
+const LayersShow = ({ layerId }) => {
+  return (
+    <div className="c-layers-show">
+      <LayersForm layerId={layerId} />
+    </div>
+  );
+};
 
-  handleSubmit = () => {
-    window.scrollTo(0, 0);
-  };
-
-  render() {
-    const {
-      dataset,
-      user: { token }
-    } = this.props;
-
-    return (
-      <div className="c-layers-show">
-        {token && (
-          <LayersForm
-            id={dataset}
-            application={[process.env.APPLICATIONS]}
-            authorization={token}
-            onSubmit={this.handleSubmit}
-          />
-        )}
-      </div>
-    );
-  }
-}
+LayersShow.propTypes = {
+  layerId: PropTypes.string.isRequired,
+};
 
 export default LayersShow;

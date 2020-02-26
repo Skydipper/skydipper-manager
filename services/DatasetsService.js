@@ -49,8 +49,8 @@ class DatasetsService {
 
   fetchAllData({
     applications = [process.env.APPLICATIONS],
-    includes,
-    filters,
+    includes = '',
+    filters = {},
     env = process.env.API_ENV
   } = {}) {
     const qParams = {

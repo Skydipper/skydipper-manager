@@ -1,12 +1,9 @@
 import { connect } from 'react-redux';
 
-// component
 import LayersShow from './component';
 
-export default connect(
-  state => ({
-    user: state.user,
-    dataset: state.routes.query.id
-  }),
-  null
-)(LayersShow);
+const mapStateToProps = state => ({
+  layerId: state.routes.query.id,
+});
+
+export default connect(mapStateToProps)(LayersShow);

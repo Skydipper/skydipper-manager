@@ -1,31 +1,25 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 // components
 import LayersNew from 'components/manager/data/layers/pages/new';
 import LayersShow from 'components/manager/data/layers/pages/show';
 
-class LayersTab extends PureComponent {
-  static propTypes = {
-    user: PropTypes.object.isRequired,
-    id: PropTypes.string
-  };
+const LayersTab = ({ layerId }) => {
+  return (
+    <div className="c-layers-tab">
+      {layerId && layerId === 'new' && <LayersNew />}
+      {layerId && layerId !== 'new' && <LayersShow />}
+    </div>
+  );
+};
 
-  static defaultProps = { id: null };
+LayersTab.propTypes = {
+  layerId: PropTypes.string,
+};
 
-  render() {
-    const {
-      id,
-      user: { token }
-    } = this.props;
-
-    return (
-      <div className="c-layers-tab">
-        {token && id && id === 'new' && <LayersNew />}
-        {token && id && id !== 'new' && <LayersShow />}
-      </div>
-    );
-  }
-}
+LayersTab.defaultProps = {
+  layerId: null,
+};
 
 export default LayersTab;

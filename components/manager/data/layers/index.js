@@ -1,12 +1,9 @@
 import { connect } from 'react-redux';
 
-// component
 import LayersTab from './component';
 
-export default connect(
-  state => ({
-    user: state.user,
-    id: state.routes.query.id
-  }),
-  null
-)(LayersTab);
+const mapStateToProps = state => ({
+  layerId: state.routes.query.id,
+});
+
+export default connect(mapStateToProps)(LayersTab);

@@ -60,8 +60,6 @@ class LayerPreviewComponent extends PureComponent {
 
     const activeLayers = flatten(layerGroups.map(lg => lg.layers.filter(l => l.active)));
 
-    console.log(activeLayers);
-
     return (
       <div className="c-field preview-container">
         <h5>Layer preview</h5>

@@ -1,43 +1,22 @@
-import React, { PureComponent } from 'react';
-import { Router } from 'routes';
+import React from 'react';
 import PropTypes from 'prop-types';
 
-// components
-import LayersForm from 'components/manager/data/layers/form/LayersForm';
+import LayersForm from 'components/manager/data/layers/form';
 
-class LayersNew extends PureComponent {
-  static propTypes = {
-    dataset: PropTypes.string,
-    user: PropTypes.object.isRequired
-  };
+const LayersNew = ({ datasetId }) => {
+  return (
+    <div className="c-layers-new">
+      <LayersForm datasetId={datasetId} />
+    </div>
+  );
+};
 
-  static defaultProps = { dataset: null };
+LayersNew.propTypes = {
+  datasetId: PropTypes.string,
+};
 
-  handleSubmit = () => {
-    const { dataset } = this.props;
-    if (dataset) {
-      Router.pushRoute('manager_data_detail', { tab: 'datasets', subtab: 'layers', id: dataset });
-    } else {
-      Router.pushRoute('manager_data', { tab: 'layers' });
-    }
-  };
-
-  render() {
-    const {
-      user: { token },
-      dataset
-    } = this.props;
-    return (
-      <div className="c-layers-new">
-        <LayersForm
-          application={[process.env.APPLICATIONS]}
-          authorization={token}
-          onSubmit={this.handleSubmit}
-          dataset={dataset}
-        />
-      </div>
-    );
-  }
-}
+LayersNew.defaultProps = {
+  datasetId: null,
+};
 
 export default LayersNew;
