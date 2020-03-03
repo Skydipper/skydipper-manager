@@ -7,7 +7,6 @@ export const LANGUAGE_OPTIONS = [
 
 export const FORM_DEFAULT_STATE = {
   authorization: '',
-  source: '',
   description: '',
   name: '',
   language: 'en',
