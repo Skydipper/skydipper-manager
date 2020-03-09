@@ -139,34 +139,6 @@ class Step1 extends PureComponent {
           {user.role === 'ADMIN' && (
             <Field
               ref={c => {
-                if (c) FORM_ELEMENTS.elements.env = c;
-              }}
-              hint={
-                'Choose "preproduction" to see this dataset it only as admin, "production" option will show it in public site.'
-              }
-              className="-fluid"
-              options={[
-                { label: 'Pre-production', value: 'preproduction' },
-                { label: 'Production', value: 'production' },
-              ]}
-              onChange={value => onChange({ env: value })}
-              properties={{
-                name: 'env',
-                label: 'Environment',
-                placeholder: 'Type the columns...',
-                noResultsText: 'Please, type the name of the columns and press enter',
-                promptTextCreator: label => `The name of the column is "${label}"`,
-                default: 'preproduction',
-                value: form.env,
-              }}
-            >
-              {Select}
-            </Field>
-          )}
-
-          {user.role === 'ADMIN' && (
-            <Field
-              ref={c => {
                 if (c) FORM_ELEMENTS.elements.published = c;
               }}
               onChange={value => onChange({ published: value.checked })}
@@ -569,15 +541,15 @@ class Step1 extends PureComponent {
                         }
                         validations={['required']}
                         className="-fluid"
-                        button={(
-<button
-  type="button"
-  className="c-button -secondary"
-  onClick={() => this.onToggleSubscribableModal(elem.id)}
->
+                        button={
+                          <button
+                            type="button"
+                            className="c-button -secondary"
+                            onClick={() => this.onToggleSubscribableModal(elem.id)}
+                          >
                             Try it
-</button>
-)}
+                          </button>
+                        }
                         properties={{
                           name: 'dataQuery',
                           label: 'Data query',
@@ -606,15 +578,15 @@ class Step1 extends PureComponent {
                         }
                         validations={['required']}
                         className="-fluid"
-                        button={(
-<button
-  type="button"
-  className="c-button -secondary"
-  onClick={() => this.onToggleSubscribableModal(elem.id)}
->
+                        button={
+                          <button
+                            type="button"
+                            className="c-button -secondary"
+                            onClick={() => this.onToggleSubscribableModal(elem.id)}
+                          >
                             Try it
-</button>
-)}
+                          </button>
+                        }
                         properties={{
                           name: 'subscriptionQuery',
                           label: 'Subscription query',

@@ -8,6 +8,7 @@ export const FORM_DEFAULT_STATE = {
   status: 1,
   default: false,
   published: true,
+  env: 'production',
 };
 
 export const FORMAT = {
