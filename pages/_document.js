@@ -30,7 +30,7 @@ export default class MyDocument extends Document {
             defer
           />
           <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.2/leaflet.draw.js"
+            src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-editable/1.2.0/Leaflet.Editable.min.js"
             crossOrigin=""
             defer
           />

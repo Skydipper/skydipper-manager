@@ -1,0 +1,16 @@
+.c-form-datepicker {
+  display: block !important;
+  line-height: 1;
+
+  input {
+    width: 100%;
+    min-width: 200px;
+    height: 44px;
+    padding: 0 10px;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid $border-color-2;
+    border-radius: 4px;
+    font-size: $font-size-normal;
+  }
+}

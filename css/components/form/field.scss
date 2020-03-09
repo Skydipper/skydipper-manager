@@ -152,7 +152,8 @@
       > textarea,
       > select,
       .input,
-      .Select-control {
+      .Select-control,
+      .c-form-datepicker input {
         border-color: $red;
       }
     }

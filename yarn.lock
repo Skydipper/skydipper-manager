@@ -3019,6 +3019,11 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
+date-fns@^2.10.0:
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.10.0.tgz#abd10604d8bafb0bcbd2ba2e9b0563b922ae4b6b"
+  integrity sha512-EhfEKevYGWhWlZbNeplfhIU/+N+x0iCIx7VzKlXma2EdQyznVlZhCptXUY+BegNpPW2kjdx15Rvq503YcXXrcA==
+
 date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
@@ -5408,7 +5413,7 @@ launch-editor@2.2.1:
     chalk "^2.3.0"
     shell-quote "^1.6.1"
 
-layer-manager@^1.10.0, layer-manager@^1.15.2:
+layer-manager@^1.10.0:
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/layer-manager/-/layer-manager-1.15.2.tgz#45f3003cd4dc60420d8ff37c035722f5fc8d6eb2"
   integrity sha512-cmm/3CTy9stXIUI8OjOh5Fbi2PuDv+Hi3jh8v8ejnQHdn6uo40821+scHSBcJmeOA1Hf4Bz3GY6RGTqOTs0OYQ==
@@ -7257,6 +7262,13 @@ react-ace@^6.5.0:
     diff-match-patch "^1.0.4"
     lodash.get "^4.4.2"
     lodash.isequal "^4.5.0"
+    prop-types "^15.6.2"
+
+react-day-picker@^7.4.0:
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-7.4.0.tgz#1b3dfe76a81864518d241214ba658da25903b7df"
+  integrity sha512-dqfr96EY7mHSpbW23hJI6of2JvxClDfHLNQ7VqctxBvNsJIzEiwh3zS8hEhqNza7xuR0vC4KN517zxndgb3/fw==
+  dependencies:
     prop-types "^15.6.2"
 
 react-dom@^16.8.6:

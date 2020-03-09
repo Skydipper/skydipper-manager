@@ -6,6 +6,7 @@ import Layout from 'layout/layout/layout-manager';
 import Tabs from 'components/ui/Tabs';
 import DatasetsIndex from 'components/manager/data/datasets/pages/list';
 import LayersIndex from 'components/manager/data/layers/pages/list';
+import MLPredictions from 'components/manager/data/ml/predictions';
 
 // constants
 import { DATA_TABS } from './constants';
@@ -15,10 +16,10 @@ class LayoutManagerData extends PureComponent {
 
   render() {
     const {
-      query: { tab }
+      query: { tab },
     } = this.props;
     // TO-DO: set properly this in express
-    const currentTab = tab || 'datasets';
+    const currentTab = /** @type {string} */ (tab) || 'datasets';
 
     return (
       <Layout
@@ -45,6 +46,7 @@ class LayoutManagerData extends PureComponent {
               <div className="column small-12">
                 {currentTab === 'datasets' && <DatasetsIndex />}
                 {currentTab === 'layers' && <LayersIndex />}
+                {currentTab === 'predictions' && <MLPredictions />}
               </div>
             </div>
           </div>
