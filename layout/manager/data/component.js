@@ -6,6 +6,7 @@ import Layout from 'layout/layout/layout-manager';
 import Tabs from 'components/ui/Tabs';
 import DatasetsIndex from 'components/manager/data/datasets/pages/list';
 import LayersIndex from 'components/manager/data/layers/pages/list';
+import MLValidation from 'components/manager/data/ml/validation';
 import MLPredictions from 'components/manager/data/ml/predictions';
 
 // constants
@@ -46,6 +47,7 @@ class LayoutManagerData extends PureComponent {
               <div className="column small-12">
                 {currentTab === 'datasets' && <DatasetsIndex />}
                 {currentTab === 'layers' && <LayersIndex />}
+                {currentTab === 'validation' && <MLValidation />}
                 {currentTab === 'predictions' && <MLPredictions />}
               </div>
             </div>

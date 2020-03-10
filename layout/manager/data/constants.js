@@ -12,6 +12,12 @@ export const DATA_TABS = [
     params: { tab: 'layers' },
   },
   {
+    label: 'ML validation',
+    value: 'validation',
+    route: 'manager_data',
+    params: { tab: 'validation' },
+  },
+  {
     label: 'ML predictions',
     value: 'predictions',
     route: 'manager_data',
