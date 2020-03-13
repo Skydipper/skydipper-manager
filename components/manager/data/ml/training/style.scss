@@ -1,0 +1,9 @@
+@import 'css/settings';
+
+.c-ml-training {
+  .c-field-buttons {
+    li:first-of-type {
+      display: none; // We hide the “Back” button
+    }
+  }
+}

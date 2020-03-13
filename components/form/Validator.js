@@ -68,6 +68,20 @@ class Validator {
           return message;
         },
       },
+      'min-n-geo': {
+        validate(value, condition, data) {
+          return (
+            value &&
+            value.geometry &&
+            value.geometry.type === 'MultiPolygon' &&
+            value.geometry.coordinates &&
+            value.geometry.coordinates.length >= data
+          );
+        },
+        message(condition) {
+          return condition;
+        },
+      },
     };
   }
 

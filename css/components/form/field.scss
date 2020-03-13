@@ -157,6 +157,12 @@
         border-color: $red;
       }
     }
+
+    .c-map-input {
+      .map {
+        border: 1px solid $red;
+      }
+    }
   }
 
   &.-pi-hidden {
