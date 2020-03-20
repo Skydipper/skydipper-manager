@@ -72,7 +72,7 @@ const DatasetsTable = ({ token, userApplications }) => {
 
     fetchDatasets(
       {
-        includes: 'layer,metadata',
+        includes: 'layer,metadata,user',
         'page[number]': state.page,
         'page[size]': INITIAL_PAGINATION.limit,
         application: userApplications.join(','),
