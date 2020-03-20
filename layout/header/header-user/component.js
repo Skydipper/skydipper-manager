@@ -66,7 +66,8 @@ class HeaderUser extends PureComponent {
                 <ul className="header-dropdown-list user-list">
                   <li className="header-dropdown-list-item">
                     <Link route="profile">
-                      <a>Profile</a>
+                      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                      <a onClick={() => this.toggleDropdown(false)}>Profile</a>
                     </Link>
                   </li>
                   <li className="header-dropdown-list-item">
