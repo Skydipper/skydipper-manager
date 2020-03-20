@@ -167,6 +167,7 @@ app.prepare().then(() => {
   server.post('/update-user', auth.updateUser);
 
   server.get('/manager*?', isAuthenticated, isAdmin, handleUrl);
+  server.get('/profile/?', isAuthenticated, isAdmin, handleUrl);
 
   server.use(handle);
 
