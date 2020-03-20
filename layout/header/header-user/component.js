@@ -51,14 +51,12 @@ class HeaderUser extends PureComponent {
             classes={{ element: 'c-header-dropdown' }}
           >
             {/* First child: This is what the item will be tethered to */}
-            <Link route="">
-              <a
-                onMouseEnter={() => this.toggleDropdown(true)}
-                onMouseLeave={() => this.toggleDropdown(false)}
-              >
-                {!photo && email && <span className="avatar-letter">{email.split('')[0]}</span>}
-              </a>
-            </Link>
+            <a
+              onMouseEnter={() => this.toggleDropdown(true)}
+              onMouseLeave={() => this.toggleDropdown(false)}
+            >
+              {!photo && email && <span className="avatar-letter">{email.split('')[0]}</span>}
+            </a>
             {/* Second child: If present, this item will be tethered to the the first child */}
             {dropdownOpened.user && (
               <div
