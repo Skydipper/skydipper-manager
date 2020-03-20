@@ -30,7 +30,7 @@ spec:
             - name: WRI_API_URL
               value: https://api.skydipper.com/v1
             - name: APPLICATIONS
-              value: rw
+              value: skydipper
             - name: API_ENV
               value: production
             - name: SECRET
