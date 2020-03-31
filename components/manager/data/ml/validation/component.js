@@ -14,7 +14,7 @@ const reducer = (state, action) => {
     case 'MODELS_FETCH_SUCCESS': {
       const models = action.payload
         .filter(
-          (model, i) => action.payload.findIndex(m => m.model_name === model.model_name) !== i
+          (model, i) => action.payload.findIndex(m => m.model_name === model.model_name) === i
         )
         .map(model => ({
           ...model,
