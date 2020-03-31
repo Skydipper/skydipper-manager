@@ -6,10 +6,10 @@ import Navigation from 'components/form/Navigation';
 import Field from 'components/form/Field';
 import Input from 'components/form/Input';
 import Spinner from 'components/ui/Spinner';
-import FileImage from 'components/form/FileImage';
+// import FileImage from 'components/form/FileImage';
 
 // services
-import UserService from 'services/UserService';
+// import UserService from 'services/UserService';
 
 export const FORM_ELEMENTS = {
   elements: {},
@@ -60,7 +60,7 @@ const Profile = ({ user, setUser }) => {
   const [step, setStep] = useState(1);
   const [stepsCount] = useState(1);
 
-  const userService = new UserService({ apiURL: process.env.CONTROL_TOWER_URL });
+  // const userService = new UserService({ apiURL: process.env.CONTROL_TOWER_URL });
 
   const onSubmit = e => {
     e.preventDefault();
@@ -153,7 +153,7 @@ const Profile = ({ user, setUser }) => {
                 {Input}
               </Field>
 
-              <div className="c-field-row">
+              {/* <div className="c-field-row">
                 <div className="row l-row">
                   <div className="column small-12 medium-2">
                     <Field
@@ -176,7 +176,7 @@ const Profile = ({ user, setUser }) => {
                     </Field>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </fieldset>
 
             <Navigation
