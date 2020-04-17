@@ -149,7 +149,7 @@ app.prepare().then(() => {
 
   // If the user is already logged in, we redirect
   server.get('/sign-in', (req, res, nextAction) => {
-    if (req.isAuthenticated()) res.redirect('/manager');
+    if (req.isAuthenticated() && req.user.role === 'ADMIN') res.redirect('/manager');
     return nextAction();
   });
 
