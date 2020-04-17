@@ -48,16 +48,11 @@ const isAuthenticated = (req, res, nextAction) => {
   return res.redirect('/sign-in');
 };
 
-const isAdmin = (req, res, nextAction) => {
-  if (req.user.role === 'ADMIN') return nextAction();
-  return res.redirect('/sign-in');
-};
-
 // Configuring session and cookie options
 const sessionOptions = {
   secret: process.env.SECRET || 'keyboard cat',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
 };
 
 if (prod) {
@@ -65,7 +60,7 @@ if (prod) {
   sessionOptions.store = new RedisStore({
     client: redisClient,
     logErrors: true,
-    prefix: 'skydipper_sess_'
+    prefix: 'skydipper_sess_',
   });
 }
 
@@ -75,7 +70,7 @@ if (prod && (USERNAME && PASSWORD)) {
   server.use(
     checkBasicAuth({
       name: USERNAME,
-      pass: PASSWORD
+      pass: PASSWORD,
     })
   );
 }
@@ -111,8 +106,7 @@ app.prepare().then(() => {
 
   // Authentication
   server.get('/auth', auth.authenticate({ failureRedirect: '/sign-in' }), (req, res) => {
-    if (req.user.role === 'ADMIN' && /manager/.test(req.session.referrer))
-      return res.redirect('/manager');
+    if (/manager/.test(req.session.referrer)) return res.redirect('/manager');
 
     const authRedirect = req.cookies.authUrl || '/sign-in';
 
@@ -149,7 +143,7 @@ app.prepare().then(() => {
 
   // If the user is already logged in, we redirect
   server.get('/sign-in', (req, res, nextAction) => {
-    if (req.isAuthenticated() && req.user.role === 'ADMIN') res.redirect('/manager');
+    if (req.isAuthenticated()) res.redirect('/manager');
     return nextAction();
   });
 
@@ -166,8 +160,8 @@ app.prepare().then(() => {
   // Update user data
   server.post('/update-user', auth.updateUser);
 
-  server.get('/manager*?', isAuthenticated, isAdmin, handleUrl);
-  server.get('/profile/?', isAuthenticated, isAdmin, handleUrl);
+  server.get('/manager*?', isAuthenticated, handleUrl);
+  server.get('/profile/?', isAuthenticated, handleUrl);
 
   server.use(handle);
 
