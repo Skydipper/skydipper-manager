@@ -1,16 +1,15 @@
-import React, { PureComponent } from 'react';
+import React, { useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { toastr } from 'react-redux-toastr';
 
 // components
 import Navigation from 'components/form/Navigation';
 import Field from 'components/form/Field';
 import Input from 'components/form/Input';
 import Spinner from 'components/ui/Spinner';
-import FileImage from 'components/form/FileImage';
+// import FileImage from 'components/form/FileImage';
 
 // services
-import UserService from 'services/UserService';
+// import UserService from 'services/UserService';
 
 export const FORM_ELEMENTS = {
   elements: {},
@@ -21,172 +20,182 @@ export const FORM_ELEMENTS = {
   },
 };
 
-class Profile extends PureComponent {
-  static propTypes = {
-    user: PropTypes.object.isRequired,
-    setUser: PropTypes.func.isRequired,
-  };
+const fetchReducer = (state, action) => {
+  switch (action.type) {
+    case 'FORM_VALID':
+      return { ...state, formInvalid: false };
+    case 'FORM_INVALID':
+      return { ...state, formInvalid: true };
+    case 'FORM_SUBMIT_INIT':
+      return {
+        ...state,
+        formLoading: true,
+        formSuccess: false,
+        formError: false,
+        formInvalid: false,
+      };
+    case 'FORM_SUBMIT_SUCCESS':
+      return { ...state, formLoading: false, formSuccess: true };
+    case 'FORM_SUBMIT_FAILURE':
+      return { ...state, formLoading: false, formError: true };
+    case 'FORM_UPDATE':
+      return { ...state, form: { ...state.form, ...action.payload } };
+    default:
+      return state;
+  }
+};
 
-  state = {
-    user: this.props.user,
-    step: 1,
-    submitting: false,
-    loading: false,
-  };
+const Profile = ({ user, setUser }) => {
+  /**
+   * @type {[any, (action: any) => void]}
+   */
+  const [state, dispatch] = useReducer(fetchReducer, {
+    form: { ...user },
+    formLoading: false,
+    formInvalid: false,
+    formSuccess: false,
+    formError: false,
+  });
 
-  onSubmit = event => {
-    event.preventDefault();
+  const [step, setStep] = useState(1);
+  const [stepsCount] = useState(1);
+
+  // const userService = new UserService({ apiURL: process.env.CONTROL_TOWER_URL });
+
+  const onSubmit = e => {
+    e.preventDefault();
 
     // Validate the form
-    const valid = FORM_ELEMENTS.validate(this.state.step);
+    const valid = FORM_ELEMENTS.validate();
 
-    if (valid) {
-      const { setUser } = this.props;
-      const { user } = this.state;
-      const { token, name, photo } = user;
+    if (!valid) {
+      dispatch({ type: 'FORM_INVALID' });
+    } else if (step !== stepsCount) {
+      dispatch({ type: 'FORM_VALID' });
+      setStep(s => s + 1);
+    } else {
+      dispatch({ type: 'FORM_SUBMIT_INIT' });
+
       const userObj = {
-        name,
-        photo: photo || '',
+        name: state.form.name,
+        photo: state.form.photo || '',
       };
-
-      this.setState({
-        loading: true,
-        submitting: true,
-      });
 
       fetch('/update-user', {
         method: 'POST',
-        body: JSON.stringify({ userObj, token }),
+        body: JSON.stringify({ userObj, token: user.token }),
         headers: { 'Content-Type': 'application/json' },
       })
         .then(response => response.json())
-        .then(updatedUser => {
-          setUser(updatedUser);
-          toastr.success('Profile updated successfully.');
-        })
-        .catch(() => {
-          toastr.error('Something went wrong', 'There was a problem updating your profile.');
-        })
-        .then(() => {
-          this.setState({
-            loading: false,
-            submitting: false,
-          });
-        });
-
-      // this.userService.updateUser(userObj, user.token)
-      //   .then((updatedUser) => {
-      //     setUser(updatedUser);
-      //     toastr.success('Profile updated successfully.');
-
-      //   })
-      //   .catch(() => { toastr.error('Something went wrong', 'There was a problem updating your user data'); })
-      //   .then(() => {
-      //     this.setState({
-      //       loading: false,
-      //       submitting: false
-      //     });
-      //   });
-    } else {
-      toastr.error('Error', 'Fill all the required fields or correct the invalid values');
+        .then(({ data }) => setUser(data))
+        .then(() => dispatch({ type: 'FORM_SUBMIT_SUCCESS' }))
+        .catch(() => dispatch({ type: 'FORM_SUBMIT_FAILURE' }));
     }
   };
 
-  onChange = value => {
-    this.setState({ user: { ...this.state.user, ...value } });
-  };
+  const onChange = newForm => dispatch({ type: 'FORM_UPDATE', payload: newForm });
 
-  userService = new UserService({ apiURL: process.env.CONTROL_TOWER_URL });
+  const onStepChange = newStep => setStep(newStep);
 
-  render() {
-    const { user, loading } = this.state;
-    const { name, email, photo } = user;
+  return (
+    <div className="c-profile-edit-profile">
+      <div className="row">
+        <div className="column small-12">
+          <form className="c-form" onSubmit={onSubmit} noValidate>
+            <Spinner isLoading={state.formLoading} className="-light" />
 
-    if (loading) {
-      return <Spinner isLoading className="-light" />;
-    }
+            {state.formError && (
+              <div className="callout alert small">Unable to save the profile</div>
+            )}
 
-    return (
-      <div className="c-profile-edit-profile">
-        {/* <Spinner isLoading={loading} className="-light" /> */}
-        <div className="row">
-          <div className="column small-12">
-            <form className="c-form" onSubmit={this.onSubmit} noValidate>
-              <fieldset className="c-field-container">
-                <Field
-                  ref={c => {
-                    if (c) FORM_ELEMENTS.elements.name = c;
-                  }}
-                  onChange={value => this.onChange({ name: value })}
-                  validations={['required']}
-                  properties={{
-                    name: 'name',
-                    label: 'Name',
-                    type: 'text',
-                    required: true,
-                    default: name,
-                  }}
-                >
-                  {Input}
-                </Field>
-                <Field
-                  ref={c => {
-                    if (c) FORM_ELEMENTS.elements.email = c;
-                  }}
-                  onChange={value => this.onChange({ email: value })}
-                  properties={{
-                    name: 'email',
-                    label: 'Email',
-                    type: 'email',
-                    required: true,
-                    default: email,
-                    disabled: true,
-                  }}
-                >
-                  {Input}
-                </Field>
+            {state.formInvalid && (
+              <div className="callout alert small">
+                Fill all the required fields or correct the invalid values
+              </div>
+            )}
 
-                <div className="c-field-row">
-                  <div className="row l-row">
-                    <div className="column small-12 medium-2">
-                      <Field
-                        ref={c => {
-                          if (c) FORM_ELEMENTS.elements.photo = c;
-                        }}
-                        onChange={value => {
-                          this.onChange({ photo: value });
-                        }}
-                        className="-fluid"
-                        mode="url"
-                        getUrlImage={file => this.userService.uploadPhoto(file, user)}
-                        properties={{
-                          name: 'photo',
-                          label: 'Photo',
-                          placeholder: 'Browse file',
-                          baseUrl: process.env.STATIC_SERVER_URL,
-                          default: photo,
-                        }}
-                      >
-                        {FileImage}
-                      </Field>
-                    </div>
+            {state.formSuccess && (
+              <div className="callout success small">The information has been saved.</div>
+            )}
+
+            <fieldset className="c-field-container">
+              <Field
+                ref={c => {
+                  if (c) FORM_ELEMENTS.elements.name = c;
+                }}
+                onChange={name => onChange({ name })}
+                validations={['required']}
+                properties={{
+                  name: 'name',
+                  label: 'Name',
+                  type: 'text',
+                  required: true,
+                  default: state.form.name,
+                }}
+              >
+                {Input}
+              </Field>
+
+              <Field
+                ref={c => {
+                  if (c) FORM_ELEMENTS.elements.email = c;
+                }}
+                onChange={email => onChange({ email })}
+                properties={{
+                  name: 'email',
+                  label: 'Email',
+                  type: 'email',
+                  required: true,
+                  default: state.form.email,
+                  disabled: true,
+                }}
+              >
+                {Input}
+              </Field>
+
+              {/* <div className="c-field-row">
+                <div className="row l-row">
+                  <div className="column small-12 medium-2">
+                    <Field
+                      ref={c => {
+                        if (c) FORM_ELEMENTS.elements.photo = c;
+                      }}
+                      onChange={photo => onChange({ photo })}
+                      className="-fluid"
+                      mode="url"
+                      getUrlImage={file => userService.uploadPhoto(file, user)}
+                      properties={{
+                        name: 'photo',
+                        label: 'Photo',
+                        placeholder: 'Browse file',
+                        baseUrl: process.env.STATIC_SERVER_URL,
+                        default: state.form.photo,
+                      }}
+                    >
+                      {FileImage}
+                    </Field>
                   </div>
                 </div>
-              </fieldset>
+              </div> */}
+            </fieldset>
 
-              <Navigation
-                step={this.state.step}
-                stepLength={this.state.step}
-                submitting={this.state.submitting}
-                hideCancel
-                onStepChange={this.triggerSaveProfile}
-              />
-            </form>
-          </div>
+            <Navigation
+              step={step}
+              stepLength={stepsCount}
+              submitting={state.formLoading}
+              hideCancel
+              onStepChange={onStepChange}
+            />
+          </form>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+Profile.propTypes = {
+  user: PropTypes.object.isRequired,
+  setUser: PropTypes.func.isRequired,
+};
 
 export default Profile;

@@ -54,16 +54,14 @@ class AdminHeaderUser extends PureComponent {
             classes={{ element: 'c-header-dropdown' }}
           >
             {/* First child: This is what the item will be tethered to */}
-            <Link route="user">
-              <a
-                onMouseEnter={() => this.toggleDropdown(true)}
-                onMouseLeave={() => this.toggleDropdown(false)}
-              >
-                {!user.photo && user.email && (
-                  <span className="avatar-letter">{user.email.split('')[0]}</span>
-                )}
-              </a>
-            </Link>
+            <a
+              onMouseEnter={() => this.toggleDropdown(true)}
+              onMouseLeave={() => this.toggleDropdown(false)}
+            >
+              {!user.photo && user.email && (
+                <span className="avatar-letter">{user.email.split('')[0]}</span>
+              )}
+            </a>
             {/* Second child: If present, this item will be tethered to the the first child */}
             {this.props.header.dropdownOpened.user && (
               <ul
@@ -73,7 +71,8 @@ class AdminHeaderUser extends PureComponent {
               >
                 <li className="header-dropdown-list-item">
                   <Link route="profile">
-                    <a>Profile</a>
+                    {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                    <a onClick={() => this.toggleDropdown(false)}>Profile</a>
                   </Link>
                 </li>
                 <li className="header-dropdown-list-item">
