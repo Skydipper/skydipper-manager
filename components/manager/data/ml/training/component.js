@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import Spinner from 'components/ui/Spinner';
@@ -17,6 +17,9 @@ import {
   MODEL_TYPES_BY_INPUT_TYPE,
   OUTPUT_TYPES_BY_MODEL_TYPE,
   MODEL_ARCHITECTURES_BY_MODEL_TYPE_AND_OUTPUT_TYPE,
+  DATASETS_MOCK,
+  INPUT_OUTPUT_IMAGES_MOCK,
+  INPUT_OUTPUT_BANDS_MOCK,
 } from './constants';
 
 import './style.scss';
@@ -41,6 +44,52 @@ const reducer = (state, action) => {
       return { ...state, formLoading: false, formError: true };
     case 'FORM_UPDATE':
       return { ...state, form: { ...state.form, ...action.payload } };
+    case 'DATASETS_FETCH_INIT':
+      return { ...state, loading: true, error: false };
+    case 'DATASETS_FETCH_SUCCESS':
+      return { ...state, loading: false, error: false, datasets: action.payload };
+    case 'DATASETS_FETCH_FAILURE':
+      return { ...state, loading: false, error: true };
+    case 'INPUT_OUTPUT_IMAGES_FETCH_INIT':
+      return { ...state, loading: true, error: false };
+    case 'INPUT_OUTPUT_IMAGES_FETCH_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        error: false,
+        inputImage: action.payload.input_image,
+        outputImage: action.payload.output_image,
+      };
+    case 'INPUT_OUTPUT_IMAGES_FETCH_FAILURE':
+      return { ...state, loading: false, error: true };
+    case 'INPUT_OUTPUT_BANDS_FETCH_INIT':
+      return { ...state, loading: true, error: false };
+    case 'INPUT_OUTPUT_BANDS_FETCH_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        error: false,
+        inputBands: Object.keys(action.payload.norm_bands.input_bands).reduce(
+          (res, key) => ({
+            ...res,
+            [JSON.parse(key.replace(/'/g, '"')).join(', ')]: action.payload.norm_bands.input_bands[
+              key
+            ],
+          }),
+          {}
+        ),
+        outputBands: Object.keys(action.payload.norm_bands.output_bands).reduce(
+          (res, key) => ({
+            ...res,
+            [JSON.parse(key.replace(/'/g, '"')).join(', ')]: action.payload.norm_bands.output_bands[
+              key
+            ],
+          }),
+          {}
+        ),
+      };
+    case 'INPUT_OUTPUT_BANDS_FETCH_FAILURE':
+      return { ...state, loading: false, error: true };
     case 'DATASETS_INPUT_SELECT':
       return {
         ...state,
@@ -74,6 +123,10 @@ const MLTraining = ({ token }) => {
     formSuccess: false,
     formError: false,
     datasets: [],
+    inputImage: null,
+    outputImage: null,
+    inputBands: [],
+    outputBands: [],
     form: {
       name: null,
       description: null,
@@ -82,6 +135,8 @@ const MLTraining = ({ token }) => {
       normalization: null,
       inputDataset: null,
       outputDataset: null,
+      inputBands: [],
+      outputBands: [],
       startDate: null,
       endDate: null,
       geojson: null,
@@ -90,6 +145,32 @@ const MLTraining = ({ token }) => {
 
   const [step] = useState(1);
   const [stepsCount] = useState(1);
+
+  const datasetOptions = useMemo(
+    () =>
+      state.datasets
+        .map(dataset => ({ label: dataset.name, value: dataset.name }))
+        .sort((d1, d2) => d1.label.localeCompare(d2.label)),
+    [state.datasets]
+  );
+
+  const inputBandOptions = useMemo(
+    () =>
+      Object.keys(state.inputBands || {}).map(band => ({
+        label: band,
+        value: band,
+      })),
+    [state.inputBands]
+  );
+
+  const outputBandOptions = useMemo(
+    () =>
+      Object.keys(state.outputBands || {}).map(band => ({
+        label: band,
+        value: band,
+      })),
+    [state.outputBands]
+  );
 
   const onSubmit = e => {
     e.preventDefault();
@@ -106,6 +187,92 @@ const MLTraining = ({ token }) => {
       // dispatch({ type: 'FORM_SUBMIT_FAILURE' });
     }
   };
+
+  useEffect(() => {
+    dispatch({ type: 'DATASETS_FETCH_INIT' });
+    // fetch(`${process.env.WRI_API_URL}/geotrainer/dataset`, {
+    //   headers: {
+    //     Authorization: token,
+    //   },
+    // })
+    // .then(res => {
+    //   if (!res.ok) {
+    //     throw new Error(`${res.status}: ${res.statusText}`);
+    //   }
+    //   return res.json();
+    // })
+    new Promise(resolve => resolve(DATASETS_MOCK))
+      .then(({ data }) => dispatch({ type: 'DATASETS_FETCH_SUCCESS', payload: data }))
+      .catch(() => dispatch({ type: 'DATASETS_FETCH_FAILURE' }));
+  }, [token]);
+
+  useEffect(() => {
+    if (
+      state.form.inputDataset &&
+      state.form.outputDataset &&
+      state.form.startDate &&
+      state.form.endDate
+    ) {
+      dispatch({ type: 'INPUT_OUTPUT_IMAGES_FETCH_INIT' });
+      // fetch(`${process.env.WRI_API_URL}/geotrainer/composites?init_date=${state.form.startDate}&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${state.form.outputDataset.name}`, {
+      //   headers: {
+      //     Authorization: token,
+      //   },
+      // })
+      // .then(res => {
+      //   if (!res.ok) {
+      //     throw new Error(`${res.status}: ${res.statusText}`);
+      //   }
+      //   return res.json();
+      // })
+      new Promise(resolve => resolve(INPUT_OUTPUT_IMAGES_MOCK))
+        .then(({ data }) => dispatch({ type: 'INPUT_OUTPUT_IMAGES_FETCH_SUCCESS', payload: data }))
+        .catch(() => dispatch({ type: 'INPUT_OUTPUT_IMAGES_FETCH_FAILURE' }));
+    }
+  }, [
+    token,
+    state.form.inputDataset,
+    state.form.outputDataset,
+    state.form.startDate,
+    state.form.endDate,
+  ]);
+
+  useEffect(() => {
+    if (
+      state.form.inputDataset &&
+      state.form.outputDataset &&
+      state.form.startDate &&
+      state.form.endDate &&
+      state.form.geojson &&
+      state.form.normalization
+    ) {
+      dispatch({ type: 'INPUT_OUTPUT_BANDS_FETCH_INIT' });
+      // fetch(`${process.env.WRI_API_URL}/geotrainer/normalize?init_date=${state.form.startDate}&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${state.form.outputDataset.name}&norm_type=${state.form.normalization}&geojson=${encodeURIComponent(state.form.geojson)}`, {
+      //   headers: {
+      //     Authorization: token,
+      //   },
+      // })
+      // .then(res => {
+      //   if (!res.ok) {
+      //     throw new Error(`${res.status}: ${res.statusText}`);
+      //   }
+      //   return res.json();
+      // })
+      new Promise(resolve => resolve(INPUT_OUTPUT_BANDS_MOCK))
+        .then(({ data }) => dispatch({ type: 'INPUT_OUTPUT_BANDS_FETCH_SUCCESS', payload: data }))
+        .catch(() => dispatch({ type: 'INPUT_OUTPUT_BANDS_FETCH_FAILURE' }));
+    }
+  }, [
+    token,
+    state.form.inputDataset,
+    state.form.outputDataset,
+    state.form.startDate,
+    state.form.endDate,
+    state.form.geojson,
+    state.form.normalization,
+  ]);
+
+  console.log({ state });
 
   return (
     <form className="c-form c-ml-training" onSubmit={onSubmit} noValidate>
@@ -131,7 +298,7 @@ const MLTraining = ({ token }) => {
           onChange={value => dispatch({ type: 'DATASETS_INPUT_SELECT', payload: value })}
           className="-fluid"
           validations={['required']}
-          options={state.datasets}
+          options={datasetOptions}
           properties={{
             name: 'inputDataset',
             label: 'Input dataset',
@@ -150,7 +317,7 @@ const MLTraining = ({ token }) => {
           onChange={value => dispatch({ type: 'DATASETS_OUTPUT_SELECT', payload: value })}
           className="-fluid"
           validations={['required']}
-          options={state.datasets}
+          options={datasetOptions}
           properties={{
             name: 'outputDataset',
             label: 'Output dataset',
@@ -199,6 +366,8 @@ const MLTraining = ({ token }) => {
           {DatePicker}
         </Field>
         <Field
+          // Trigger a re-render of the map when the input and ouput images change
+          key={[state.inputImage, state.outputImage].toString()}
           ref={c => {
             if (c) {
               FORM_ELEMENTS.elements.geojson = c;
@@ -213,8 +382,19 @@ const MLTraining = ({ token }) => {
           properties={{
             name: 'geojson',
             label: 'Geometries',
-            // TODO: use real layers
-            layers: [],
+            layers:
+              state.inputImage && state.outputImage
+                ? [
+                    {
+                      name: 'Input dataset',
+                      url: state.inputImage,
+                    },
+                    {
+                      name: 'Output dataset',
+                      url: state.outputImage,
+                    },
+                  ]
+                : [],
           }}
         >
           {MapInput}
@@ -239,6 +419,12 @@ const MLTraining = ({ token }) => {
           {Select}
         </Field>
         <Field
+          // Trigger a re-render of the map when the input bands change
+          key={
+            state.inputBands && Object.keys(state.inputBands).length
+              ? Object.keys(state.inputBands).toString()
+              : undefined
+          }
           ref={c => {
             if (c) {
               FORM_ELEMENTS.elements.inputBands = c;
@@ -247,7 +433,7 @@ const MLTraining = ({ token }) => {
           onChange={value => dispatch({ type: 'BANDS_INPUT_SELECT', payload: value })}
           className="-fluid"
           validations={['required']}
-          options={[]}
+          options={inputBandOptions}
           hint="Select the bands of the input dataset that you want to use for the training."
           properties={{
             name: 'input-bands',
@@ -255,13 +441,23 @@ const MLTraining = ({ token }) => {
             default: state.form.inputBands,
             required: true,
             multi: true,
-            // TODO: use real layers
-            layers: [],
+            layers: state.inputBands
+              ? Object.keys(state.inputBands).map(band => ({
+                  name: band,
+                  url: state.inputBands[band],
+                }))
+              : [],
           }}
         >
           {MapSelect}
         </Field>
         <Field
+          // Trigger a re-render of the map when the output bands change
+          key={
+            state.outputBands && Object.keys(state.outputBands).length
+              ? Object.keys(state.outputBands).toString()
+              : undefined
+          }
           ref={c => {
             if (c) {
               FORM_ELEMENTS.elements.outputBands = c;
@@ -270,7 +466,7 @@ const MLTraining = ({ token }) => {
           onChange={value => dispatch({ type: 'BANDS_OUTPUT_SELECT', payload: value })}
           className="-fluid"
           validations={['required']}
-          options={[]}
+          options={outputBandOptions}
           hint="Select the bands of the output dataset that you want to use for the training."
           properties={{
             name: 'output-bands',
@@ -278,8 +474,12 @@ const MLTraining = ({ token }) => {
             default: state.form.outputBands,
             required: true,
             multi: true,
-            // TODO: use real layers
-            layers: [],
+            layers: state.outputBands
+              ? Object.keys(state.outputBands).map(band => ({
+                  name: band,
+                  url: state.outputBands[band],
+                }))
+              : [],
           }}
         >
           {MapSelect}
