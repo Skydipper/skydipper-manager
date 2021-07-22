@@ -177,26 +177,35 @@ const MLPredictions = ({ token }) => {
 
   useEffect(() => {
     let inLayer;
-    let outLayer;
+    let outLayers = [];
     let control;
     if (leafletMap && state.prediction) {
       inLayer = L.tileLayer(state.prediction.inputImage[0], { minZoom: 6 }).addTo(leafletMap);
-      outLayer = L.tileLayer(state.prediction.outputImage[0], { minZoom: 6 }).addTo(leafletMap);
+      outLayers = state.prediction.outputImage.map(url =>
+        L.tileLayer(url, { minZoom: 6 }).addTo(leafletMap)
+      );
 
       // leafletMap.setView(state.prediction.centroid, 6);
 
       const layer = {
         'Input layer': inLayer,
-        'Output layer': outLayer,
+        ...(outLayers.length === 1
+          ? {
+              'Output layer': outLayers[0],
+            }
+          : outLayers.reduce(
+              (res, layer, index) => ({ ...res, [`Output layer ${index + 1}`]: layer }),
+              {}
+            )),
       };
 
       control = L.control.layers(null, layer, { collapsed: false }).addTo(leafletMap);
     }
 
     return () => {
-      if (inLayer && outLayer) {
+      if (inLayer && outLayers.length) {
         leafletMap.removeLayer(inLayer);
-        leafletMap.removeLayer(outLayer);
+        outLayers.forEach(layer => leafletMap.removeLayer(layer));
         leafletMap.removeControl(control);
       }
     };
