@@ -57,6 +57,21 @@ class MapSelect extends FormElement {
 
       L.control.layers(null, layerControl, { collapsed: false }).addTo(this.map);
     }
+
+    if (properties.bounds) {
+      this.map.fitBounds(properties.bounds);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.properties.bounds !== this.props.properties.bounds &&
+      nextProps.properties.bounds
+    ) {
+      this.map.fitBounds(nextProps.properties.bounds);
+    }
+
+    return true;
   }
 
   componentWillUnmount() {

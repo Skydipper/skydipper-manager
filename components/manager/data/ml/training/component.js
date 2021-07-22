@@ -393,6 +393,12 @@ const MLTraining = ({ token }) => {
                     },
                   ]
                 : [],
+            bounds:
+              state.form.inputDataset && state.form.outputDataset
+                ? L.latLngBounds(state.form.inputDataset.bounds).extend(
+                    L.latLngBounds(state.form.outputDataset.bounds)
+                  )
+                : undefined,
           }}
         >
           {MapInput}
@@ -445,6 +451,7 @@ const MLTraining = ({ token }) => {
                   url: state.inputBands[band],
                 }))
               : [],
+            bounds: state.form.inputDataset ? state.form.inputDataset.bounds : undefined,
           }}
         >
           {MapSelect}
@@ -478,6 +485,7 @@ const MLTraining = ({ token }) => {
                   url: state.outputBands[band],
                 }))
               : [],
+            bounds: state.form.outputDataset ? state.form.outputDataset.bounds : undefined,
           }}
         >
           {MapSelect}
