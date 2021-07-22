@@ -223,18 +223,18 @@ const MLTraining = ({ token }) => {
 
   useEffect(() => {
     dispatch({ type: 'DATASETS_FETCH_INIT' });
-    // fetch(`${process.env.WRI_API_URL}/geotrainer/dataset`, {
-    //   headers: {
-    //     Authorization: token,
-    //   },
-    // })
-    // .then(res => {
-    //   if (!res.ok) {
-    //     throw new Error(`${res.status}: ${res.statusText}`);
-    //   }
-    //   return res.json();
-    // })
-    new Promise(resolve => resolve(DATASETS_MOCK))
+
+    fetch(`${process.env.WRI_API_URL}/geotrainer/dataset`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(({ data }) => dispatch({ type: 'DATASETS_FETCH_SUCCESS', payload: data }))
       .catch(() => dispatch({ type: 'DATASETS_FETCH_FAILURE' }));
   }, [token]);
@@ -247,18 +247,25 @@ const MLTraining = ({ token }) => {
       state.form.endDate
     ) {
       dispatch({ type: 'INPUT_OUTPUT_IMAGES_FETCH_INIT' });
-      // fetch(`${process.env.WRI_API_URL}/geotrainer/composites?init_date=${state.form.startDate}&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${state.form.outputDataset.name}`, {
-      //   headers: {
-      //     Authorization: token,
-      //   },
-      // })
-      // .then(res => {
-      //   if (!res.ok) {
-      //     throw new Error(`${res.status}: ${res.statusText}`);
-      //   }
-      //   return res.json();
-      // })
-      new Promise(resolve => resolve(INPUT_OUTPUT_IMAGES_MOCK))
+
+      fetch(
+        `${process.env.WRI_API_URL}/geotrainer/composites?init_date=${
+          state.form.startDate
+        }&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${
+          state.form.outputDataset.name
+        }`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then(({ data }) => dispatch({ type: 'INPUT_OUTPUT_IMAGES_FETCH_SUCCESS', payload: data }))
         .catch(() => dispatch({ type: 'INPUT_OUTPUT_IMAGES_FETCH_FAILURE' }));
     }
@@ -280,18 +287,25 @@ const MLTraining = ({ token }) => {
       state.form.normalization
     ) {
       dispatch({ type: 'INPUT_OUTPUT_BANDS_FETCH_INIT' });
-      // fetch(`${process.env.WRI_API_URL}/geotrainer/normalize?init_date=${state.form.startDate}&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${state.form.outputDataset.name}&norm_type=${state.form.normalization}&geojson=${encodeURIComponent(state.form.geojson)}`, {
-      //   headers: {
-      //     Authorization: token,
-      //   },
-      // })
-      // .then(res => {
-      //   if (!res.ok) {
-      //     throw new Error(`${res.status}: ${res.statusText}`);
-      //   }
-      //   return res.json();
-      // })
-      new Promise(resolve => resolve(INPUT_OUTPUT_BANDS_MOCK))
+
+      fetch(
+        `${process.env.WRI_API_URL}/geotrainer/normalize?init_date=${
+          state.form.startDate
+        }&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${
+          state.form.outputDataset.name
+        }&norm_type=${state.form.normalization}&geojson=${encodeURIComponent(state.form.geojson)}`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then(({ data }) => dispatch({ type: 'INPUT_OUTPUT_BANDS_FETCH_SUCCESS', payload: data }))
         .catch(() => dispatch({ type: 'INPUT_OUTPUT_BANDS_FETCH_FAILURE' }));
     }
