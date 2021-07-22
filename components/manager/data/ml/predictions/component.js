@@ -183,7 +183,7 @@ const MLPredictions = ({ token }) => {
       inLayer = L.tileLayer(state.prediction.inputImage[0], { minZoom: 6 }).addTo(leafletMap);
       outLayer = L.tileLayer(state.prediction.outputImage[0], { minZoom: 6 }).addTo(leafletMap);
 
-      leafletMap.setView(state.prediction.centroid, 6);
+      // leafletMap.setView(state.prediction.centroid, 6);
 
       const layer = {
         'Input layer': inLayer,
