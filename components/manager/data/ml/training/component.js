@@ -181,10 +181,43 @@ const MLTraining = ({ token }) => {
     if (!valid) {
       dispatch({ type: 'FORM_INVALID' });
     } else {
-      // TODO
-      // dispatch({ type: 'FORM_SUBMIT_INIT' });
-      // dispatch({ type: 'FORM_SUBMIT_SUCCESS' });
-      // dispatch({ type: 'FORM_SUBMIT_FAILURE' });
+      const { form } = state;
+
+      const body = {
+        dataset_names: [form.inputDataset.name, form.outputDataset.name].join(', '),
+        init_date: form.startDate,
+        end_date: form.endDate,
+        geojson: form.geojson,
+        norm_type: form.normalization,
+        input_bands: form.inputBands.map(({ value }) => value).join(', '),
+        output_bands: form.outputBands.map(({ value }) => value).join(', '),
+        input_type: form.inputType,
+        model_type: form.modelType,
+        model_output: form.outputType,
+        model_architecture: form.modelArchitecture,
+        model_name: form.name,
+        model_description: form.description,
+        batch_size: form.batchSize,
+        epochs: form.epochs,
+      };
+
+      dispatch({ type: 'FORM_SUBMIT_INIT' });
+
+      fetch(`${process.env.WRI_API_URL}/geotrainer/jobs`, {
+        method: 'POST',
+        headers: {
+          Authorization: token,
+        },
+        body: JSON.stringify(body),
+      })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
+        .then(() => dispatch({ type: 'FORM_SUBMIT_SUCCESS' }))
+        .catch(() => dispatch({ type: 'FORM_SUBMIT_FAILURE' }));
     }
   };
 
@@ -283,6 +316,12 @@ const MLTraining = ({ token }) => {
       {state.formInvalid && (
         <div className="callout alert small">
           Fill all the required fields or correct the invalid values
+        </div>
+      )}
+
+      {state.formSuccess && (
+        <div className="callout success small">
+          The model has been queued for training. This can take a few minutes.
         </div>
       )}
 
