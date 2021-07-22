@@ -272,8 +272,6 @@ const MLTraining = ({ token }) => {
     state.form.normalization,
   ]);
 
-  console.log({ state });
-
   return (
     <form className="c-form c-ml-training" onSubmit={onSubmit} noValidate>
       <Spinner isLoading={state.loading || state.formLoading} className="-light" />
