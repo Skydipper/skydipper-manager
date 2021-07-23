@@ -172,6 +172,33 @@ const MLTraining = ({ token }) => {
     [state.outputBands]
   );
 
+  const geometryMapProperties = useMemo(
+    () => ({
+      name: 'geojson',
+      label: 'Geometries',
+      layers:
+        state.inputImage && state.outputImage
+          ? [
+              {
+                name: 'Input dataset',
+                url: state.inputImage,
+              },
+              {
+                name: 'Output dataset',
+                url: state.outputImage,
+              },
+            ]
+          : [],
+      bounds:
+        state.form.inputDataset && state.form.outputDataset
+          ? L.latLngBounds(state.form.inputDataset.bounds).extend(
+              L.latLngBounds(state.form.outputDataset.bounds)
+            )
+          : undefined,
+    }),
+    [state.inputImage, state.outputImage, state.form.inputDataset, state.form.outputDataset]
+  );
+
   const onSubmit = e => {
     e.preventDefault();
 
@@ -416,29 +443,7 @@ const MLTraining = ({ token }) => {
             { type: 'min-n-geo', data: 3, condition: `You must draw at least 3 geometries` },
           ]}
           hint="Please draw at least 3 geometries that will be used for the training, the validation and testing. Click the first point to close a shape."
-          properties={{
-            name: 'geojson',
-            label: 'Geometries',
-            layers:
-              state.inputImage && state.outputImage
-                ? [
-                    {
-                      name: 'Input dataset',
-                      url: state.inputImage,
-                    },
-                    {
-                      name: 'Output dataset',
-                      url: state.outputImage,
-                    },
-                  ]
-                : [],
-            bounds:
-              state.form.inputDataset && state.form.outputDataset
-                ? L.latLngBounds(state.form.inputDataset.bounds).extend(
-                    L.latLngBounds(state.form.outputDataset.bounds)
-                  )
-                : undefined,
-          }}
+          properties={geometryMapProperties}
         >
           {MapInput}
         </Field>
