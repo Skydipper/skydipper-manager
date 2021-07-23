@@ -199,6 +199,16 @@ const MLTraining = ({ token }) => {
     [state.inputImage, state.outputImage, state.form.inputDataset, state.form.outputDataset]
   );
 
+  const boundsOverlap = useMemo(
+    () =>
+      state.form.inputDataset && state.form.outputDataset
+        ? L.latLngBounds(state.form.inputDataset.bounds).overlaps(
+            L.latLngBounds(state.form.outputDataset.bounds)
+          )
+        : true,
+    [state.form.inputDataset, state.form.outputDataset]
+  );
+
   const onSubmit = e => {
     e.preventDefault();
 
@@ -349,6 +359,13 @@ const MLTraining = ({ token }) => {
       {state.formSuccess && (
         <div className="callout success small">
           The model has been queued for training. This can take a few minutes.
+        </div>
+      )}
+
+      {!boundsOverlap && (
+        <div className="callout alert small">
+          The input and output datasets {"don't"} intersect. Please consider changing either of
+          them.
         </div>
       )}
 
