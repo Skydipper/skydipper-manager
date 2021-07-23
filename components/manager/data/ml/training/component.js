@@ -1,5 +1,8 @@
 import React, { useReducer, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import intersect from '@turf/intersect';
+import bbox from '@turf/bbox';
+import bboxPolygon from '@turf/bbox-polygon';
 
 import Spinner from 'components/ui/Spinner';
 import Field from 'components/form/Field';
@@ -172,6 +175,38 @@ const MLTraining = ({ token }) => {
     [state.outputBands]
   );
 
+  const boundsOverlap = useMemo(
+    () =>
+      state.form.inputDataset && state.form.outputDataset
+        ? L.latLngBounds(state.form.inputDataset.bounds).overlaps(
+            L.latLngBounds(state.form.outputDataset.bounds)
+          )
+        : true,
+    [state.form.inputDataset, state.form.outputDataset]
+  );
+
+  const datasetsBounds = useMemo(() => {
+    if (!state.form.inputDataset || !state.form.outputDataset || !boundsOverlap) {
+      return undefined;
+    }
+
+    const latLngBoundsToLngLatBbox = bounds => [
+      bounds[0][1],
+      bounds[0][0],
+      bounds[1][1],
+      bounds[1][0],
+    ];
+    const lngLatBboxToLatLngBounds = bbox => [[bbox[1], bbox[0]], [bbox[3], bbox[2]]];
+
+    const inputPolygon = bboxPolygon(latLngBoundsToLngLatBbox(state.form.inputDataset.bounds));
+    const outputPolygon = bboxPolygon(latLngBoundsToLngLatBbox(state.form.outputDataset.bounds));
+
+    const intersection = intersect(inputPolygon, outputPolygon);
+    const bounds = lngLatBboxToLatLngBounds(bbox(intersection));
+
+    return L.latLngBounds(bounds);
+  }, [state.form.inputDataset, state.form.outputDataset, boundsOverlap]);
+
   const geometryMapProperties = useMemo(
     () => ({
       name: 'geojson',
@@ -189,24 +224,9 @@ const MLTraining = ({ token }) => {
               },
             ]
           : [],
-      bounds:
-        state.form.inputDataset && state.form.outputDataset
-          ? L.latLngBounds(state.form.inputDataset.bounds).extend(
-              L.latLngBounds(state.form.outputDataset.bounds)
-            )
-          : undefined,
+      bounds: datasetsBounds,
     }),
-    [state.inputImage, state.outputImage, state.form.inputDataset, state.form.outputDataset]
-  );
-
-  const boundsOverlap = useMemo(
-    () =>
-      state.form.inputDataset && state.form.outputDataset
-        ? L.latLngBounds(state.form.inputDataset.bounds).overlaps(
-            L.latLngBounds(state.form.outputDataset.bounds)
-          )
-        : true,
-    [state.form.inputDataset, state.form.outputDataset]
+    [state.inputImage, state.outputImage, datasetsBounds]
   );
 
   const onSubmit = e => {
