@@ -197,16 +197,17 @@ const MLTraining = ({ token }) => {
         model_architecture: form.modelArchitecture,
         model_name: form.name,
         model_description: form.description,
-        batch_size: form.batchSize,
-        epochs: form.epochs,
+        batch_size: parseInt(form.batchSize),
+        epochs: parseInt(form.epochs),
       };
-
+      console.log(body);
       dispatch({ type: 'FORM_SUBMIT_INIT' });
 
       fetch(`${process.env.WRI_API_URL}/geotrainer/jobs`, {
         method: 'POST',
         headers: {
           Authorization: token,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
       })
@@ -251,8 +252,8 @@ const MLTraining = ({ token }) => {
       fetch(
         `${process.env.WRI_API_URL}/geotrainer/composites?init_date=${
           state.form.startDate
-        }&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${
-          state.form.outputDataset.name
+        }&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.slug},${
+          state.form.outputDataset.slug
         }`,
         {
           headers: {
@@ -291,9 +292,9 @@ const MLTraining = ({ token }) => {
       fetch(
         `${process.env.WRI_API_URL}/geotrainer/normalize?init_date=${
           state.form.startDate
-        }&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.name},${
-          state.form.outputDataset.name
-        }&norm_type=${state.form.normalization}&geojson=${encodeURIComponent(state.form.geojson)}`,
+        }&end_date=${state.form.endDate}&dataset_names=${state.form.inputDataset.slug},${
+          state.form.outputDataset.slug
+        }&norm_type=${state.form.normalization}&geojson=${encodeURIComponent(JSON.stringify(state.form.geojson))}`,
         {
           headers: {
             Authorization: token,
