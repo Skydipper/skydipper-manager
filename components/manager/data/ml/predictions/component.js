@@ -286,7 +286,7 @@ const MLPredictions = ({ token }) => {
         <div id="ml-predictions-map" />
         {!!state.prediction && (
           <div className="legend">
-            <p>Model name</p>
+            <p>{state.model.model_name}</p>
             <div className="scale">
               <span>0</span>
               <span>1</span>
