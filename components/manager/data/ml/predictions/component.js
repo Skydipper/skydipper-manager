@@ -186,15 +186,15 @@ const MLPredictions = ({ token }) => {
       );
 
       // leafletMap.setView(state.prediction.centroid, 6);
-
+      const layersName = ["cropland", "land", "water", "urban"];
       const layer = {
         'Input layer': inLayer,
         ...(outLayers.length === 1
           ? {
-              'Output layer': outLayers[0],
+              'Turbidity blended mean': outLayers[0],
             }
           : outLayers.reduce(
-              (res, layer, index) => ({ ...res, [`Output layer ${index + 1}`]: layer }),
+              (res, layer, index) => ({ ...res, [`${layersName[index]}`]: layer }),
               {}
             )),
       };
